@@ -1,15 +1,9 @@
-package com.github.yoojia.minizxing;
+package com.github.yoojia.minizxing.app;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.hardware.Camera;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -18,15 +12,15 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.github.yoojia.qrcode.FinderView;
-import com.github.yoojia.qrcode.QRCodeDecode;
-import com.github.yoojia.qrcode.QRCodeDecodeTask;
-import com.github.yoojia.qrcode.ResultPointCallback;
-import com.github.yoojia.qrcode.camera.AutoFocusListener;
-import com.github.yoojia.qrcode.camera.CameraManager;
-import com.github.yoojia.qrcode.camera.CameraSurfaceCallback;
+import com.github.yoojia.minizxing.R;
+import com.github.yoojia.minizxing.FinderView;
+import com.github.yoojia.minizxing.QRCodeDecode;
+import com.github.yoojia.minizxing.QRCodeDecodeTask;
+import com.github.yoojia.minizxing.ResultPointCallback;
+import com.github.yoojia.minizxing.camera.AutoFocusListener;
+import com.github.yoojia.minizxing.camera.CameraManager;
+import com.github.yoojia.minizxing.camera.CameraSurfaceCallback;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
@@ -122,7 +116,6 @@ public class QRCodeScanActivity extends Activity{
             mCameraManager.openDriver(surfaceHolder);
             mCameraManager.requestPreview(mPreviewCallback);
             mCameraManager.startPreview(mAutoFocusListener);
-            mViewfinderView.drawViewfinder();
         }catch (IOException ioe) {
             Log.w(TAG, ioe);
         }

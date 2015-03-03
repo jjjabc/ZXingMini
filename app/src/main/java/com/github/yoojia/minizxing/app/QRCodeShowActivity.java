@@ -1,6 +1,5 @@
-package com.github.yoojia.minizxing;
+package com.github.yoojia.minizxing.app;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.AsyncTask;
@@ -10,7 +9,8 @@ import android.view.Display;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.github.yoojia.qrcode.QRCodeEncode;
+import com.github.yoojia.minizxing.R;
+import com.github.yoojia.minizxing.QRCodeEncode;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
