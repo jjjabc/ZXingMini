@@ -49,6 +49,7 @@ public final class QRCodeEncode {
         if (TextUtils.isEmpty(content)){
             throw new IllegalArgumentException("QRCode encode content CANNOT be empty");
         }
+        final long start = System.currentTimeMillis();
         final Map<EncodeHintType,Object> hints = new EnumMap<>(EncodeHintType.class);
         hints.put(EncodeHintType.CHARACTER_SET, mConfigBuilder.mCharset);
         BitMatrix result;
@@ -69,6 +70,8 @@ public final class QRCodeEncode {
         }
         Bitmap bitmap = Bitmap.createBitmap(finalBitmapWidth, finalBitmapHeight, Bitmap.Config.ARGB_8888);
         bitmap.setPixels(pixels, 0, finalBitmapWidth, 0, 0, finalBitmapWidth, finalBitmapHeight);
+        final long end = System.currentTimeMillis();
+        Log.d(TAG, "QRCode encode in " + (end - start) + "ms");
         return bitmap;
     }
 

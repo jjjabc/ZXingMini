@@ -45,6 +45,7 @@ public class QRCodeDecode {
     }
 
     public String decode(final Bitmap image){
+        final long start = System.currentTimeMillis();
         final int width = image.getWidth(), height = image.getHeight();
         final int[] pixels = new int[width * height];
         image.getPixels(pixels, 0, width, 0, 0, width, height);
@@ -52,6 +53,8 @@ public class QRCodeDecode {
         final BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
         try {
             Result rawResult = mMultiFormatReader.decodeWithState(bitmap);
+            final long end = System.currentTimeMillis();
+            Log.d(TAG, "QRCode decode in " + (end - start) + "ms");
             Log.d(TAG, rawResult.toString());
             return rawResult.getText();
         } catch (NotFoundException re) {
