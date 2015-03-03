@@ -1,0 +1,70 @@
+package com.github.yoojia.minizxing;
+
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.view.Display;
+import android.view.WindowManager;
+import android.widget.ImageView;
+
+import com.github.yoojia.qrcode.QRCodeEncode;
+
+/**
+ * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
+ * @date :   2015-03-03
+ * 生成二维码并展示的界面
+ */
+public class QRCodeShowActivity extends ActionBarActivity {
+
+    private ImageView mQRCodeImage;
+    private QRCodeEncode mEncoder;
+    private DecodeTask mDecodeTask;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_show);
+        setTitle("生成二维码");
+
+        mQRCodeImage = (ImageView) findViewById(R.id.qrcode_image);
+
+        final WindowManager manager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        final Display display = manager.getDefaultDisplay();
+        Point displaySize = new Point();
+        display.getSize(displaySize);
+        final int width = displaySize.x;
+        final int height = displaySize.y;
+        final int dimension = width < height ? width : height;
+
+        mEncoder = new QRCodeEncode.Builder()
+                .setBackgroundColor(0xFFFFFF)
+                .setCodeColor(0xFF000000)
+                .setOutputBitmapWidth(dimension)
+                .setOutputBitmapHeight(dimension)
+                .build();
+
+        mDecodeTask = new DecodeTask();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        mDecodeTask.execute("http://github.com/yoojia/minizxing");
+    }
+
+    private class DecodeTask extends AsyncTask<String, Void, Bitmap>{
+
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            return mEncoder.encode(params[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            mQRCodeImage.setImageBitmap(bitmap);
+        }
+    }
+}
