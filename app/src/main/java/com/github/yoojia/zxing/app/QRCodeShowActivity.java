@@ -1,4 +1,4 @@
-package com.github.yoojia.minizxing.app;
+package com.github.yoojia.zxing.app;
 
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -9,8 +9,8 @@ import android.view.Display;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.github.yoojia.minizxing.R;
-import com.github.yoojia.minizxing.QRCodeEncode;
+import com.github.yoojia.zxing.R;
+import com.github.yoojia.zxing.QRCodeEncode;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
@@ -52,7 +52,7 @@ public class QRCodeShowActivity extends ActionBarActivity {
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        mDecodeTask.execute("http://github.com/yoojia/minizxing");
+        mDecodeTask.execute("https://github.com/yoojia/ZXingMini");
     }
 
     private class DecodeTask extends AsyncTask<String, Void, Bitmap>{

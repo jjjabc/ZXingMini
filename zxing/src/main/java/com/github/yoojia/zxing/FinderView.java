@@ -1,4 +1,4 @@
-package com.github.yoojia.minizxing;
+package com.github.yoojia.zxing;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -13,7 +13,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.github.yoojia.qrcode.R;
-import com.github.yoojia.minizxing.camera.CameraManager;
+import com.github.yoojia.zxing.camera.CameraManager;
 import com.google.zxing.ResultPoint;
 
 import java.util.ArrayList;
@@ -25,10 +25,6 @@ import java.util.List;
  * This view is overlaid on top of the camera preview. It adds the viewfinder
  * rectangle and partial transparency outside it, as well as the laser scanner
  * animation and result points.
- * 
- * 该视图是覆盖在相机的预览视图之上的一层视图。扫描区构成原理，其实是在预览视图上画四块遮罩层，
- * 中间留下的部分保持透明，并画上一条激光线，实际上该线条就是展示而已，与扫描功能没有任何关系。
- * 
  * @author dswitkin@google.com (Daniel Switkin)
  */
 public final class FinderView extends View {
@@ -40,7 +36,7 @@ public final class FinderView extends View {
 
     private static int MIDDLE_LINE_WIDTH;
     private static int MIDDLE_LINE_PADDING;
-	private static final int SPEEN_DISTANCE = 8;
+	private static final int SPEED_DISTANCE = 8;
 
 	private Paint paint;
     private int CORNER_PADDING;
@@ -135,8 +131,8 @@ public final class FinderView extends View {
 			slideTop = frame.top;
 			slideBottom = frame.bottom;
 		}
-		// 绘制中间的线,每次刷新界面，中间的线往下移动SPEEN_DISTANCE
-		slideTop += SPEEN_DISTANCE;
+		// 绘制中间的线,每次刷新界面，中间的线往下移动SPEED_DISTANCE
+		slideTop += SPEED_DISTANCE;
 		if (slideTop >= slideBottom) {
 			slideTop = frame.top;
 		}
@@ -150,12 +146,6 @@ public final class FinderView extends View {
 
 	}
 
-	/**
-	 * 绘制遮掩层
-	 * 
-	 * @param canvas
-	 * @param frame
-	 */
 	private void drawCover(Canvas canvas, Rect frame) {
 		// 获取屏幕的宽和高
 		int width = canvas.getWidth();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.yoojia.minizxing;
+package com.github.yoojia.zxing;
 
 import com.google.zxing.ResultPoint;
 

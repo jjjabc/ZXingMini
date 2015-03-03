@@ -1,4 +1,4 @@
-package com.github.yoojia.minizxing.camera;
+package com.github.yoojia.zxing.camera;
 
 /**
  * @author :   Yoojia.Chen (yoojiachen@163.com)

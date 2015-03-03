@@ -8,12 +8,12 @@ buildscript {
     }
 }
 
-group = 'com.github.yoojia'
-version = '0.1'
-
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
+
+group = 'com.github.yoojia'
+version = '0.1'
 
 android {
     compileSdkVersion 21
@@ -25,6 +25,7 @@ android {
         versionCode 1
         versionName version
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -41,8 +42,8 @@ tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
 
-def siteUrl = 'https://github.com/yoojia/MiniZXing'
-def gitUrl = 'https://github.com/yoojia/MiniZXing.git'
+def siteUrl = 'https://github.com/yoojia/ZXingMini'
+def gitUrl = 'https://github.com/yoojia/ZXingMini.git'
 
 bintray {
     user = BINTRAY_USER
@@ -54,7 +55,7 @@ bintray {
         name = 'MiniZXing'
         desc = 'An easy to use library for ZXing QRCode support library'
         websiteUrl = siteUrl
-        issueTrackerUrl = 'https://github.com/yoojia/MiniZXing/issues'
+        issueTrackerUrl = 'https://github.com/yoojia/ZXingMini/issues'
         vcsUrl = gitUrl
         licenses = ['Apache-2.0']
         labels = ['Android', 'QRCode', 'ZXing']
@@ -64,6 +65,7 @@ bintray {
 
 install {
     repositories.mavenInstaller {
+        pom.artifactId = 'zxingmini'
         pom {
             project {
                 packaging 'aar'
@@ -86,7 +88,6 @@ install {
                     connection gitUrl
                     developerConnection gitUrl
                     url siteUrl
-
                 }
             }
         }

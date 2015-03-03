@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.yoojia.minizxing.camera;
+package com.github.yoojia.zxing.camera;
 
 import android.hardware.Camera;
 import android.util.Log;

@@ -1,4 +1,4 @@
-package com.github.yoojia.minizxing;
+package com.github.yoojia.zxing;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

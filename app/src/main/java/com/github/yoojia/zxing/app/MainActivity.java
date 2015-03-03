@@ -1,4 +1,4 @@
-package com.github.yoojia.minizxing.app;
+package com.github.yoojia.zxing.app;
 
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import com.github.yoojia.minizxing.R;
+import com.github.yoojia.zxing.R;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)

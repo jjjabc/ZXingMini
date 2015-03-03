@@ -1,4 +1,4 @@
-package com.github.yoojia.minizxing.app;
+package com.github.yoojia.zxing.app;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -12,14 +12,14 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.github.yoojia.minizxing.R;
-import com.github.yoojia.minizxing.FinderView;
-import com.github.yoojia.minizxing.QRCodeDecode;
-import com.github.yoojia.minizxing.QRCodeDecodeTask;
-import com.github.yoojia.minizxing.ResultPointCallback;
-import com.github.yoojia.minizxing.camera.AutoFocusListener;
-import com.github.yoojia.minizxing.camera.CameraManager;
-import com.github.yoojia.minizxing.camera.CameraSurfaceCallback;
+import com.github.yoojia.zxing.R;
+import com.github.yoojia.zxing.FinderView;
+import com.github.yoojia.zxing.QRCodeDecode;
+import com.github.yoojia.zxing.QRCodeDecodeTask;
+import com.github.yoojia.zxing.ResultPointCallback;
+import com.github.yoojia.zxing.camera.AutoFocusListener;
+import com.github.yoojia.zxing.camera.CameraManager;
+import com.github.yoojia.zxing.camera.CameraSurfaceCallback;
 
 import java.io.IOException;
 

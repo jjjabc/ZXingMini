@@ -1,1 +1,1 @@
-include ':app', ':minizxing'
+include ':app', ':zxing'
