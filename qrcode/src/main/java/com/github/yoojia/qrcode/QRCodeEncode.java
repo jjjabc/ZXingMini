@@ -2,6 +2,7 @@ package com.github.yoojia.qrcode;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -17,6 +18,8 @@ import java.util.Map;
  * 将文本信息生成QRCode图片
  */
 public final class QRCodeEncode {
+
+    public static final String TAG = QRCodeDecode.class.getSimpleName();
 
     private final Builder mConfigBuilder;
     private final MultiFormatWriter mMultiFormatWriter;
@@ -51,7 +54,8 @@ public final class QRCodeEncode {
         BitMatrix result;
         try {
             result = mMultiFormatWriter.encode(content, BarcodeFormat.QR_CODE, width, height, hints);
-        } catch (Exception iae) {
+        } catch (Exception e) {
+            Log.w(TAG, e);
             return null;
         }
         int finalBitmapWidth = result.getWidth();

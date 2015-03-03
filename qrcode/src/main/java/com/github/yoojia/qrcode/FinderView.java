@@ -12,7 +12,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.github.yoojia.qrcode.R;
 import com.github.yoojia.qrcode.camera.CameraManager;
 import com.google.zxing.ResultPoint;
 
@@ -93,10 +92,10 @@ public final class FinderView extends View {
 
 	private CameraManager cameraManager;
 
-    private Bitmap bitmapCornerTopleft;
-    private Bitmap bitmapCornerTopright;
-    private Bitmap bitmapCornerBottomLeft;
-    private Bitmap bitmapCornerBottomRight;
+    private Bitmap mCornerTopLeft;
+    private Bitmap mCornerTopRight;
+    private Bitmap mCornerBottomLeft;
+    private Bitmap mCornerBottomRight;
 
 	// This constructor is used when the class is built from an XML resource.
 	public FinderView(Context context, AttributeSet attrs) {
@@ -108,22 +107,17 @@ public final class FinderView extends View {
 
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG); // 开启反锯齿
 
-		Resources resources = getResources();
-		maskColor = resources.getColor(android.R.color.transparent); // 遮掩层颜色
-		resultColor = resources.getColor(android.R.color.black);
-
+		final Resources resources = getResources();
+		maskColor = 0xAA252525; // 遮掩层颜色
+		resultColor = 0xAAFF0000;
 		resultPointColor = 0x88FF0000;
 		possibleResultPoints = new ArrayList<>(5);
 		lastPossibleResultPoints = null;
 
-        bitmapCornerTopleft = BitmapFactory.decodeResource(resources,
-                R.mipmap.scan_corner_top_left);
-        bitmapCornerTopright = BitmapFactory.decodeResource(resources,
-                R.mipmap.scan_corner_top_right);
-        bitmapCornerBottomLeft = BitmapFactory.decodeResource(resources,
-                R.mipmap.scan_corner_bottom_left);
-        bitmapCornerBottomRight = BitmapFactory.decodeResource(
-                resources, R.mipmap.scan_corner_bottom_right);
+        mCornerTopLeft = BitmapFactory.decodeResource(resources, R.mipmap.scan_corner_top_left);
+        mCornerTopRight = BitmapFactory.decodeResource(resources, R.mipmap.scan_corner_top_right);
+        mCornerBottomLeft = BitmapFactory.decodeResource(resources, R.mipmap.scan_corner_bottom_left);
+        mCornerBottomRight = BitmapFactory.decodeResource( resources, R.mipmap.scan_corner_bottom_right);
 
 	}
 
@@ -252,17 +246,17 @@ public final class FinderView extends View {
 		paint.setColor(Color.WHITE);
 		paint.setAlpha(OPAQUE);
 
-		canvas.drawBitmap(bitmapCornerTopleft, frame.left + CORNER_PADDING,
+		canvas.drawBitmap(mCornerTopLeft, frame.left + CORNER_PADDING,
 				frame.top + CORNER_PADDING, paint);
-		canvas.drawBitmap(bitmapCornerTopright, frame.right - CORNER_PADDING
-				- bitmapCornerTopright.getWidth(), frame.top + CORNER_PADDING,
+		canvas.drawBitmap(mCornerTopRight, frame.right - CORNER_PADDING
+				- mCornerTopRight.getWidth(), frame.top + CORNER_PADDING,
 				paint);
-		canvas.drawBitmap(bitmapCornerBottomLeft, frame.left + CORNER_PADDING,
-				2 + (frame.bottom - CORNER_PADDING - bitmapCornerBottomLeft
+		canvas.drawBitmap(mCornerBottomLeft, frame.left + CORNER_PADDING,
+				2 + (frame.bottom - CORNER_PADDING - mCornerBottomLeft
 						.getHeight()), paint);
-		canvas.drawBitmap(bitmapCornerBottomRight, frame.right - CORNER_PADDING
-				- bitmapCornerBottomRight.getWidth(), 2 + (frame.bottom
-				- CORNER_PADDING - bitmapCornerBottomRight.getHeight()), paint);
+		canvas.drawBitmap(mCornerBottomRight, frame.right - CORNER_PADDING
+				- mCornerBottomRight.getWidth(), 2 + (frame.bottom
+				- CORNER_PADDING - mCornerBottomRight.getHeight()), paint);
 
 	}
 

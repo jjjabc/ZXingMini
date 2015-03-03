@@ -1,6 +1,7 @@
 package com.github.yoojia.qrcode;
 
 import android.graphics.Bitmap;
+import android.support.annotation.IntDef;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -14,6 +15,8 @@ import com.google.zxing.Result;
 import com.google.zxing.ResultPointCallback;
 import com.google.zxing.common.HybridBinarizer;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -91,4 +94,5 @@ public class QRCodeDecode {
             return new QRCodeDecode(this);
         }
     }
+
 }

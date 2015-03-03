@@ -63,7 +63,7 @@ public abstract class QRCodeDecodeTask extends AsyncTask<QRCodeDecodeTask.Camera
         final int height = parameters.getPreviewSize().height;
         final YuvImage yuv = new YuvImage(cameraPreview.mData, parameters.getPreviewFormat(), width, height, null);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        yuv.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+        yuv.compressToJpeg(new Rect(0, 0, width, height), 100, out);// Best
         final byte[] bytes = out.toByteArray();
         final Bitmap src = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         final Matrix matrix = new Matrix();

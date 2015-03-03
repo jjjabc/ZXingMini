@@ -20,15 +20,15 @@ import com.google.zxing.ResultPoint;
 
 public final class ResultPointCallback implements com.google.zxing.ResultPointCallback {
 
-	private final FinderView viewfinderView;
+	private final FinderView mFinderView;
 
-	public ResultPointCallback(FinderView viewfinderView) {
-		this.viewfinderView = viewfinderView;
+	public ResultPointCallback(FinderView mFinderView) {
+		this.mFinderView = mFinderView;
 	}
 
 	@Override
 	public void foundPossibleResultPoint(ResultPoint point) {
-		viewfinderView.addPossibleResultPoint(point);
+		mFinderView.addPossibleResultPoint(point);
 	}
 
 }

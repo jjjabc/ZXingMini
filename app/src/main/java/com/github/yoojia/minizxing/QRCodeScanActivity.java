@@ -136,7 +136,7 @@ public class QRCodeScanActivity extends Activity{
 
         @Override
         protected void onPostDecoded(String result) {
-            Toast.makeText(QRCodeScanActivity.this, "结果：" + result, Toast.LENGTH_SHORT).show();
+            Toast.makeText(QRCodeScanActivity.this, "扫描结果：\n" + result, Toast.LENGTH_SHORT).show();
         }
 
         @Override
