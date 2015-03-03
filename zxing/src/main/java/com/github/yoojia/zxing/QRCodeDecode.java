@@ -37,7 +37,6 @@ public class QRCodeDecode {
         formats.add(BarcodeFormat.QR_CODE);
         hints.put(DecodeHintType.POSSIBLE_FORMATS, formats);
         hints.put(DecodeHintType.CHARACTER_SET, builder.mCharset);
-        hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK, builder.mResultPointCallback);
         mMultiFormatReader.setHints(hints);
     }
 
@@ -65,7 +64,6 @@ public class QRCodeDecode {
     public static class Builder{
 
         private String mCharset = "UTF-8";
-        private ResultPointCallback mResultPointCallback;
 
         /**
          * 设置文本编码格式
@@ -77,16 +75,6 @@ public class QRCodeDecode {
                 throw new IllegalArgumentException("Illegal charset: " + charset);
             }
             mCharset = charset;
-            return this;
-        }
-
-        /**
-         * 设置解码关键点回调接口
-         * @param resultPointCallback 回调接口
-         * @return Builder，用于链式调用
-         */
-        public Builder setResultPointCallback(ResultPointCallback resultPointCallback) {
-            mResultPointCallback = resultPointCallback;
             return this;
         }
 

@@ -33,7 +33,6 @@ public class QRCodeScanActivity extends Activity{
     public static final String TAG = QRCodeScanActivity.class.getSimpleName();
 
     private CameraManager mCameraManager;
-    private FinderView mViewfinderView;
     private SurfaceView mSurfaceView;
     private ImageView mCapturePreview;
     private QRCodeDecode mQRCodeDecode;
@@ -82,15 +81,13 @@ public class QRCodeScanActivity extends Activity{
         setContentView(R.layout.activity_scan);
 
         mCapturePreview = (ImageView) findViewById(R.id.decode_preview);
-        mViewfinderView = (FinderView) findViewById(R.id.capture_viewfinder_view);
+        final FinderView finderView = (FinderView) findViewById(R.id.capture_viewfinder_view);
         mSurfaceView = (SurfaceView) findViewById(R.id.capture_preview_view);
 
         mCameraManager = new CameraManager(getApplication());
-        mViewfinderView.setCameraManager(mCameraManager);
+        finderView.setCameraManager(mCameraManager);
 
-        mQRCodeDecode = new QRCodeDecode.Builder()
-                .setResultPointCallback(new ResultPointCallback(mViewfinderView))
-                .build();
+        mQRCodeDecode = new QRCodeDecode.Builder().build();
     }
 
     @Override

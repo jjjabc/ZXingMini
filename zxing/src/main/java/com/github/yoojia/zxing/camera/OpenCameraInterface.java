@@ -58,7 +58,6 @@ public final class OpenCameraInterface {
             }
             cameraId = index;
         }
-
         Camera camera;
         if (cameraId < numCameras) {
             Log.i(TAG, "Opening camera #" + cameraId);

@@ -34,7 +34,6 @@ import java.io.IOException;
  * This object wraps the Camera service object and expects to be the only one talking to it. The
  * implementation encapsulates the steps needed to take preview-sized images, which are used for
  * both preview and decoding.
- *
  * @author dswitkin@google.com (Daniel Switkin)
  */
 public final class CameraManager {
@@ -283,8 +282,7 @@ public final class CameraManager {
 
     private void setDesiredCameraParameters(Camera camera, boolean safeMode) {
         Camera.Parameters parameters = camera.getParameters();
-        CameraConfigurationUtils.setFocus(
-                parameters,
+        CameraConfigurationUtils.setFocus( parameters,
                 true, // auto focus
                 true, // disable continuous
                 safeMode);

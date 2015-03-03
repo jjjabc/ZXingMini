@@ -25,6 +25,9 @@ import java.util.List;
  * This view is overlaid on top of the camera preview. It adds the viewfinder
  * rectangle and partial transparency outside it, as well as the laser scanner
  * animation and result points.
+ *
+ * - 屏幕中间模拟激光扫描线效果的View。它是个纯粹的动画，与二维码识别过程没有任何关系。
+ *
  * @author dswitkin@google.com (Daniel Switkin)
  */
 public final class FinderView extends View {
@@ -45,10 +48,6 @@ public final class FinderView extends View {
     private boolean isFirst = true;
 
     private final int maskColor;
-    private final int resultPointColor;
-    private List<ResultPoint> possibleResultPoints;
-
-	private List<ResultPoint> lastPossibleResultPoints;
 
 	private CameraManager cameraManager;
     private Bitmap mCornerTopLeft;
@@ -66,10 +65,9 @@ public final class FinderView extends View {
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG); // 开启反锯齿
 		final Resources resources = getResources();
 		maskColor = 0xAA252525; // 遮掩层颜色
-		resultPointColor = 0x88FF0000;
-		possibleResultPoints = new ArrayList<>(5);
-		lastPossibleResultPoints = null;
-
+        /**
+         * 缓存图片资源。
+         */
         mCornerTopLeft = BitmapFactory.decodeResource(resources, R.mipmap.scan_corner_top_left);
         mCornerTopRight = BitmapFactory.decodeResource(resources, R.mipmap.scan_corner_top_right);
         mCornerBottomLeft = BitmapFactory.decodeResource(resources, R.mipmap.scan_corner_bottom_left);
@@ -90,41 +88,16 @@ public final class FinderView extends View {
 		if (frame == null) {
 			return;
 		}
-		// 绘制遮掩层
 		drawCover(canvas, frame);
-        // 画扫描框边上的角
-        drawRectEdges(canvas, frame);
-        // 绘制扫描线
-        drawScanningLine(canvas, frame);
-        List<ResultPoint> currentPossible = possibleResultPoints;
-        Collection<ResultPoint> currentLast = lastPossibleResultPoints;
-        if (currentPossible.isEmpty()) {
-            lastPossibleResultPoints = null;
-        }
-        else {
-            possibleResultPoints = new ArrayList<>(5);
-            lastPossibleResultPoints = currentPossible;
-            paint.setAlpha(OPAQUE);
-            paint.setColor(resultPointColor);
-            for (ResultPoint point : currentPossible) {
-                canvas.drawCircle(frame.left + point.getX(), frame.top + point.getY(), 6.0f, paint);
-            }
-        }
-        if (currentLast != null) {
-            paint.setAlpha(OPAQUE / 2);
-            paint.setColor(resultPointColor);
-            for (ResultPoint point : currentLast) {
-                canvas.drawCircle(frame.left + point.getX(), frame.top + point.getY(), 3.0f, paint);
-            }
-        }
-        // 只刷新扫描框的内容，其他地方不刷新
+        drawEdges(canvas, frame);
+        drawScanLaxer(canvas, frame);
         postInvalidateDelayed(ANIMATION_DELAY, frame.left, frame.top, frame.right, frame.bottom);
 	}
 
 	/**
 	 * 绘制扫描线
 	 */
-	private void drawScanningLine(Canvas canvas, Rect frame) {
+	private void drawScanLaxer(Canvas canvas, Rect frame) {
 		// 初始化中间线滑动的最上边和最下边
 		if (isFirst) {
 			isFirst = false;
@@ -152,18 +125,13 @@ public final class FinderView extends View {
 		int height = canvas.getHeight();
 		// Draw the exterior (i.e. outside the framing rect) darkened
 		paint.setColor(maskColor);
-		// 画出扫描框外面的阴影部分，共四个部分，扫描框的上面到屏幕上面，扫描框的下面到屏幕下面
-		// 扫描框的左边面到屏幕左边，扫描框的右边到屏幕右边
 		canvas.drawRect(0, 0, width, frame.top, paint);
 		canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
 		canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
 		canvas.drawRect(0, frame.bottom + 1, width, height, paint);
 	}
 
-	/**
-	 * 描绘方形的四个角
-	 */
-	private void drawRectEdges(Canvas canvas, Rect frame) {
+	private void drawEdges(Canvas canvas, Rect frame) {
 		paint.setColor(Color.WHITE);
 		paint.setAlpha(OPAQUE);
 		canvas.drawBitmap(mCornerTopLeft, frame.left + CORNER_PADDING, frame.top + CORNER_PADDING, paint);
@@ -173,18 +141,6 @@ public final class FinderView extends View {
                 2 + (frame.bottom - CORNER_PADDING - mCornerBottomLeft.getHeight()), paint);
 		canvas.drawBitmap(mCornerBottomRight, frame.right - CORNER_PADDING - mCornerBottomRight.getWidth(),
                 2 + (frame.bottom - CORNER_PADDING - mCornerBottomRight.getHeight()), paint);
-	}
-
-	public void addPossibleResultPoint(final ResultPoint point) {
-		List<ResultPoint> points = possibleResultPoints;
-		synchronized (points) {
-			points.add(point);
-			int size = points.size();
-			if (size > MAX_RESULT_POINTS) {
-				// trim it
-				points.subList(0, size - MAX_RESULT_POINTS / 2).clear();
-			}
-		}
 	}
 
 	public int dip2px(Context context, float dipValue) {
