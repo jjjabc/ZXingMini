@@ -52,24 +52,23 @@ bintray {
     configurations = ['archives'] //When uploading configuration files
     pkg {
         repo = 'android'
-        name = 'MiniZXing'
+        name = 'ZXingMini'
         desc = 'An easy to use library for ZXing QRCode support library'
         websiteUrl = siteUrl
         issueTrackerUrl = 'https://github.com/yoojia/ZXingMini/issues'
         vcsUrl = gitUrl
         licenses = ['Apache-2.0']
-        labels = ['Android', 'QRCode', 'ZXing']
         publicDownloadNumbers = true
     }
 }
 
 install {
     repositories.mavenInstaller {
-        pom.artifactId = 'zxingmini'
+        pom.artifactId = 'zxing'
         pom {
             project {
                 packaging 'aar'
-                name 'A wrap library of Android ZXing'
+                name 'An easy to use library for ZXing QRCode support library'
                 url siteUrl
                 licenses {
                     license {
