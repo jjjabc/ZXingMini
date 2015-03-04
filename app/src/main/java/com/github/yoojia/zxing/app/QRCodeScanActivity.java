@@ -16,7 +16,6 @@ import com.github.yoojia.zxing.R;
 import com.github.yoojia.zxing.FinderView;
 import com.github.yoojia.zxing.QRCodeDecode;
 import com.github.yoojia.zxing.QRCodeDecodeTask;
-import com.github.yoojia.zxing.ResultPointCallback;
 import com.github.yoojia.zxing.camera.AutoFocusListener;
 import com.github.yoojia.zxing.camera.CameraManager;
 import com.github.yoojia.zxing.camera.CameraSurfaceCallback;
