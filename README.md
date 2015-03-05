@@ -21,9 +21,11 @@ ZXingMini已对ZXing生成二维码图做了封装，通过 QRCodeEncode 类可�
                     .setCodeColor(0xFF000000) // 指定编码块颜色，默认为黑色
                     .setOutputBitmapWidth(dimension) // 生成图片宽度
                     .setOutputBitmapHeight(dimension) // 生成图片高度
+                    .setOutputBitmapMargin(0) // 设置为没有白边
                     .build();
 
     final Bitmap _QRCodeImage = encoder.encode("你的文本内容");
+    // 解码时间大概在 160ms 左右，建议用AsyncTask来处理。
 
 ```
 

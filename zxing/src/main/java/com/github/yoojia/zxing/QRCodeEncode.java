@@ -51,7 +51,12 @@ public final class QRCodeEncode {
         }
         final long start = System.currentTimeMillis();
         final Map<EncodeHintType,Object> hints = new EnumMap<>(EncodeHintType.class);
+        // 字符编码
         hints.put(EncodeHintType.CHARACTER_SET, mConfigBuilder.mCharset);
+        if (mConfigBuilder.mHintMargin >= 0){
+            // 输出图片外边距
+            hints.put(EncodeHintType.MARGIN, mConfigBuilder.mHintMargin);
+        }
         BitMatrix result;
         try {
             result = mMultiFormatWriter.encode(content, BarcodeFormat.QR_CODE, width, height, hints);
@@ -82,6 +87,7 @@ public final class QRCodeEncode {
         private String mCharset = "UTF-8";
         private int mOutputBitmapWidth;
         private int mOutputBitmapHeight;
+        private int mHintMargin = -1;
 
         /**
          * 设置生成二维码图片的背景色
@@ -133,6 +139,15 @@ public final class QRCodeEncode {
          */
         public Builder setOutputBitmapHeight(int outputBitmapHeight) {
             mOutputBitmapHeight = outputBitmapHeight;
+            return this;
+        }
+
+        /**
+         * 设置输出二维码与图片边缘的距离
+         * @param hintMargin 距离值，正整数。
+         */
+        public Builder setOutputBitmapPadding(int hintMargin) {
+            mHintMargin = hintMargin;
             return this;
         }
 

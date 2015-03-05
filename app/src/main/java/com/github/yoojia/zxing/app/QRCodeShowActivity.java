@@ -42,6 +42,7 @@ public class QRCodeShowActivity extends ActionBarActivity {
         mEncoder = new QRCodeEncode.Builder()
                 .setBackgroundColor(0xFFFFFF)
                 .setCodeColor(0xFF000000)
+                .setOutputBitmapPadding(0)
                 .setOutputBitmapWidth(dimension)
                 .setOutputBitmapHeight(dimension)
                 .build();

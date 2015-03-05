@@ -26,6 +26,9 @@ public abstract class QRCodeDecodeTask extends AsyncTask<QRCodeDecodeTask.Camera
 
     @Override
     final protected String doInBackground(CameraPreview... params) {
+        if (params.length == 0){
+            throw new IllegalArgumentException("Parameter required when call 'execute(CameraPreview)'; ");
+        }
         final Bitmap progress = capture(params[0]);
         this.publishProgress(progress);
         return mQRCodeDecode.decode(progress);
@@ -54,7 +57,7 @@ public abstract class QRCodeDecodeTask extends AsyncTask<QRCodeDecodeTask.Camera
      * @param capture 图片
      */
     protected void onDecodeProgress(Bitmap capture){
-
+        // Override if need
     }
 
     private Bitmap capture(CameraPreview cameraPreview){
