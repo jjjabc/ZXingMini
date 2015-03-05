@@ -40,3 +40,10 @@ ZXingMini已对ZXing二维码解码部分做了封装。通过 QRCodeDecode 类�
 ```
 
 通常，二维码解码与相机联合使用。ZXingMini对相机管理的代码也做了简化，使用起来非常简单。详细代码参考QRCodeScanActivity代码。
+
+## 依赖
+
+    dependencies {
+        ...
+        compile 'com.github.yoojia:zxing:0.1@aar'
+    }
