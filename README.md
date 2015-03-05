@@ -39,11 +39,58 @@ ZXingMini已对ZXing二维码解码部分做了封装。通过 QRCodeDecode 类�
 
 ```
 
-通常，二维码解码与相机联合使用。ZXingMini对相机管理的代码也做了简化，使用起来非常简单。详细代码参考QRCodeScanActivity代码。
+通常，二维码解码与相机联合使用。ZXingMini对相机管理的代码也做了简化，使用起来非常简单。只需要简单的几行代码，如下：
+
+```java
+
+    public class QRCodeScanActivity extends Activity{
+
+        private QRCodeScanSupport mQRCodeScanSupport;
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            setContentView(R.layout.activity_scan);
+
+            // 查找布局文件中的元素
+            ImageView capturePreview = (ImageView) findViewById(R.id.decode_preview);
+            final FinderView finderView = (FinderView) findViewById(R.id.capture_viewfinder_view);
+            SurfaceView surfaceView = (SurfaceView) findViewById(R.id.capture_preview_view);
+
+            // 创建扫描支持类
+            mQRCodeScanSupport = new QRCodeScanSupport(surfaceView, finderView);
+            mQRCodeScanSupport.setCapturePreview(capturePreview);
+
+            // 如何处理扫描结果
+            mQRCodeScanSupport.setOnScanResultListener(new QRCodeScanSupport.OnScanResultListener() {
+                @Override
+                public void onScanResult(String notNullResult) {
+                    Toast.makeText(QRCodeScanActivity.this, "扫描结果: " + notNullResult, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+
+        @Override
+        protected void onResume() {
+            mQRCodeScanSupport.onResume(this);
+            super.onResume();
+        }
+
+        @Override
+        protected void onPause() {
+            mQRCodeScanSupport.onPause(this);
+            super.onPause();
+        }
+    }
+
+```
 
 ## 依赖
 
     dependencies {
         ...
-        compile 'com.github.yoojia:zxing:0.1@aar'
+        compile 'com.github.yoojia:zxing:0.2@aar'
     }
