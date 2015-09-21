@@ -1,4 +1,4 @@
-package com.github.yoojia.zxing;
+package com.github.yoojia.zxing.qrcode;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
@@ -11,7 +11,6 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
-import com.google.zxing.ResultPointCallback;
 import com.google.zxing.common.HybridBinarizer;
 
 import java.util.ArrayList;
@@ -24,13 +23,13 @@ import java.util.Map;
  * @date :   2015-03-03
  * 二维码图片解码成文本信息
  */
-public class QRCodeDecode {
+public class Decoder {
 
-    public static final String TAG = QRCodeDecode.class.getSimpleName();
+    public static final String TAG = Decoder.class.getSimpleName();
 
     private final MultiFormatReader mMultiFormatReader;
 
-    private QRCodeDecode(Builder builder) {
+    private Decoder(Builder builder) {
         mMultiFormatReader = new MultiFormatReader();
         Map<DecodeHintType, Object> hints = new EnumMap<>(DecodeHintType.class);
         Collection<BarcodeFormat> formats = new ArrayList<>();
@@ -78,8 +77,8 @@ public class QRCodeDecode {
             return this;
         }
 
-        public QRCodeDecode build(){
-            return new QRCodeDecode(this);
+        public Decoder build(){
+            return new Decoder(this);
         }
     }
 

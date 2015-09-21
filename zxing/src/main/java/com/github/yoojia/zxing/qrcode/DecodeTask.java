@@ -1,4 +1,4 @@
-package com.github.yoojia.zxing;
+package com.github.yoojia.zxing.qrcode;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,11 +16,11 @@ import java.io.ByteArrayOutputStream;
  * @date :   2015-03-03
  * 二维码解码线程
  */
-public abstract class QRCodeDecodeTask extends AsyncTask<QRCodeDecodeTask.CameraPreview, Bitmap, String>{
+public abstract class DecodeTask extends AsyncTask<DecodeTask.CameraPreview, Bitmap, String>{
 
-    private final QRCodeDecode mQRCodeDecode;
+    private final Decoder mQRCodeDecode;
 
-    public QRCodeDecodeTask(QRCodeDecode qrCodeDecode) {
+    public DecodeTask(Decoder qrCodeDecode) {
         mQRCodeDecode = qrCodeDecode;
     }
 

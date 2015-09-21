@@ -1,4 +1,4 @@
-package com.github.yoojia.zxing;
+package com.github.yoojia.zxing.qrcode;
 
 import android.content.Context;
 import android.content.res.Resources;

@@ -62,6 +62,10 @@ public final class CameraManager {
         this.context = context;
     }
 
+    public AutoFocusManager getAutoFocusManager() {
+        return autoFocusManager;
+    }
+
     public void requestPreview(Camera.PreviewCallback callback){
         camera.setOneShotPreviewCallback(callback);
     }
@@ -147,8 +151,7 @@ public final class CameraManager {
         if (theCamera != null && !previewing) {
             theCamera.startPreview();
             previewing = true;
-            autoFocusManager = new AutoFocusManager(camera);
-            autoFocusManager.setAutoFocusListener(autoFocusListener);
+            autoFocusManager = new AutoFocusManager(camera, autoFocusListener);
         }
     }
 
@@ -157,7 +160,7 @@ public final class CameraManager {
      */
     public synchronized void stopPreview() {
         if (autoFocusManager != null) {
-            autoFocusManager.stop();
+            autoFocusManager.stopAutoFocus();
             autoFocusManager = null;
         }
         if (camera != null && previewing) {

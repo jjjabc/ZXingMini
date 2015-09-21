@@ -1,4 +1,4 @@
-package com.github.yoojia.zxing;
+package com.github.yoojia.zxing.qrcode;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
@@ -17,14 +17,14 @@ import java.util.Map;
  * @date :   2015-03-03
  * 将文本信息生成QRCode图片
  */
-public final class QRCodeEncode {
+public final class Encoder {
 
-    public static final String TAG = QRCodeDecode.class.getSimpleName();
+    public static final String TAG = Decoder.class.getSimpleName();
 
     private final Builder mConfigBuilder;
     private final MultiFormatWriter mMultiFormatWriter;
 
-    private QRCodeEncode(Builder configBuilder) {
+    private Encoder(Builder configBuilder) {
         mConfigBuilder = configBuilder;
         mMultiFormatWriter = new MultiFormatWriter();
     }
@@ -154,8 +154,8 @@ public final class QRCodeEncode {
         /**
          * @return QRCode生成器对象
          */
-        public QRCodeEncode build(){
-            return new QRCodeEncode(this);
+        public Encoder build(){
+            return new Encoder(this);
         }
     }
 }

@@ -1,27 +1,16 @@
 package com.github.yoojia.zxing.app;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.hardware.Camera;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.github.yoojia.zxing.QRCodeScanSupport;
+import com.github.yoojia.zxing.qrcode.QRCodeScanSupport;
 import com.github.yoojia.zxing.R;
-import com.github.yoojia.zxing.FinderView;
-import com.github.yoojia.zxing.QRCodeDecode;
-import com.github.yoojia.zxing.QRCodeDecodeTask;
-import com.github.yoojia.zxing.camera.AutoFocusListener;
-import com.github.yoojia.zxing.camera.CameraManager;
-import com.github.yoojia.zxing.camera.CameraSurfaceCallback;
-
-import java.io.IOException;
+import com.github.yoojia.zxing.qrcode.FinderView;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
@@ -58,13 +47,13 @@ public class QRCodeScanActivity extends Activity{
 
     @Override
     protected void onResume() {
-        mQRCodeScanSupport.onResume(this);
         super.onResume();
+        mQRCodeScanSupport.onResume();
     }
 
     @Override
     protected void onPause() {
-        mQRCodeScanSupport.onPause(this);
         super.onPause();
+        mQRCodeScanSupport.onPause();
     }
 }

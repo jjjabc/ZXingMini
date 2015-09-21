@@ -1,4 +1,4 @@
-package com.github.yoojia.zxing;
+package com.github.yoojia.zxing.qrcode;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import com.github.yoojia.zxing.camera.AutoFocusListener;
 import com.github.yoojia.zxing.camera.CameraManager;
 import com.github.yoojia.zxing.camera.CameraSurfaceCallback;
+import com.github.yoojia.zxing.camera.Cameras;
 
 import java.io.IOException;
 
@@ -23,18 +24,12 @@ public class QRCodeScanSupport {
 
     public static final String TAG = QRCodeScanSupport.class.getSimpleName();
 
-    private final CameraManager mCameraManager;
+//    private final CameraManager mCameraManager;
+    private final Cameras mCameras;
     private final SurfaceView mSurfaceView;
-    private final QRCodeDecode mQRCodeDecode = new QRCodeDecode.Builder().build();;
+    private final Decoder mQRCodeDecode = new Decoder.Builder().build();
     private ImageView mCapturePreview = null;
     private OnScanResultListener mOnScanResultListener;
-
-    private final CameraSurfaceCallback mCallback = new CameraSurfaceCallback() {
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            initCamera(holder);
-        }
-    };
 
     /**
      * 处理预览图片
@@ -49,19 +44,8 @@ public class QRCodeScanSupport {
                 mDecodeTask.cancel(true);
             }
             mDecodeTask = new PreviewQRCodeDecodeTask(mQRCodeDecode);
-            QRCodeDecodeTask.CameraPreview preview = new QRCodeDecodeTask.CameraPreview(data, camera);
+            DecodeTask.CameraPreview preview = new DecodeTask.CameraPreview(data, camera);
             mDecodeTask.execute(preview);
-        }
-    };
-
-    /**
-     * 自动对焦结果回调
-     */
-    private final AutoFocusListener mAutoFocusListener = new AutoFocusListener() {
-        @Override
-        public void onFocus(boolean focusSuccess) {
-            // 对焦成功后，请求触发生成 **一次** 预览图片
-            if (focusSuccess) mCameraManager.requestPreview(mPreviewCallback);
         }
     };
 
@@ -86,47 +70,24 @@ public class QRCodeScanSupport {
     }
 
     public QRCodeScanSupport(SurfaceView surfaceView, FinderView finderView, OnScanResultListener listener) {
-        mCameraManager = new CameraManager(surfaceView.getContext().getApplicationContext());
-        finderView.setCameraManager(mCameraManager);
+        mCameras = new Cameras(surfaceView);
+        mCameras.setPreviewCallback(mPreviewCallback);
+        finderView.setCameraManager(mCameras.getCameraManager());
         mSurfaceView = surfaceView;
         mOnScanResultListener = listener;
     }
 
-    /**
-     * 在Activity的onResume中调用
-     * @param activity Activity
-     */
-    public void onResume(Activity activity){
-        SurfaceHolder surfaceHolder = mSurfaceView.getHolder();
-        surfaceHolder.addCallback(mCallback);
+    public void onResume(){
+        mCameras.onResume();
     }
 
-    /**
-     * 在Activity的onPause中调用
-     * @param activity Activity
-     */
-    public void onPause(Activity activity){
-        SurfaceHolder surfaceHolder = mSurfaceView.getHolder();
-        surfaceHolder.removeCallback(mCallback);
-        // 关闭摄像头
-        mCameraManager.stopPreview();
-        mCameraManager.closeDriver();
+    public void onPause(){
+        mCameras.onPause();
     }
 
-    private void initCamera(SurfaceHolder surfaceHolder) {
-        if (mCameraManager.isOpen()) return;
-        try {
-            mCameraManager.openDriver(surfaceHolder);
-            mCameraManager.requestPreview(mPreviewCallback);
-            mCameraManager.startPreview(mAutoFocusListener);
-        }catch (IOException ioe) {
-            Log.w(TAG, ioe);
-        }
-    }
+    private class PreviewQRCodeDecodeTask extends DecodeTask {
 
-    private class PreviewQRCodeDecodeTask extends QRCodeDecodeTask{
-
-        public PreviewQRCodeDecodeTask(QRCodeDecode qrCodeDecode) {
+        public PreviewQRCodeDecodeTask(Decoder qrCodeDecode) {
             super(qrCodeDecode);
         }
 

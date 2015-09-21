@@ -10,7 +10,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.github.yoojia.zxing.R;
-import com.github.yoojia.zxing.QRCodeEncode;
+import com.github.yoojia.zxing.qrcode.Encoder;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
@@ -20,7 +20,7 @@ import com.github.yoojia.zxing.QRCodeEncode;
 public class QRCodeShowActivity extends ActionBarActivity {
 
     private ImageView mQRCodeImage;
-    private QRCodeEncode mEncoder;
+    private Encoder mEncoder;
     private DecodeTask mDecodeTask;
 
     @Override
@@ -39,7 +39,7 @@ public class QRCodeShowActivity extends ActionBarActivity {
         final int height = displaySize.y;
         final int dimension = width < height ? width : height;
 
-        mEncoder = new QRCodeEncode.Builder()
+        mEncoder = new Encoder.Builder()
                 .setBackgroundColor(0xFFFFFF)
                 .setCodeColor(0xFF000000)
                 .setOutputBitmapPadding(0)
