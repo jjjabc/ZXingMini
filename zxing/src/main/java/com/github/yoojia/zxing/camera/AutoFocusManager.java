@@ -54,6 +54,9 @@ public class AutoFocusManager implements Camera.AutoFocusCallback{
         if (ms < 1000) {
             throw new IllegalArgumentException("Auto Focus period tim to short !");
         }
+        if( ! mAutoFocusEnabled) {
+            return;
+        }
         mAutoFocusHandler.removeCallbacks(mAutoFocusTask);
         if (0 == mScheduleMs.get()){
             mAutoFocusHandler.postDelayed(mAutoFocusTask, ms);
