@@ -13,7 +13,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'com.github.yoojia'
-version = '0.4'
+version = '0.5'
 
 android {
     compileSdkVersion 21

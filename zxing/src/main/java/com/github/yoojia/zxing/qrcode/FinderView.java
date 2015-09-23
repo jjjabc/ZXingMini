@@ -14,11 +14,6 @@ import android.view.View;
 
 import com.github.yoojia.qrcode.R;
 import com.github.yoojia.zxing.camera.CameraManager;
-import com.google.zxing.ResultPoint;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 
 /**
