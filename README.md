@@ -21,7 +21,7 @@ ZXingMini已对ZXing生成二维码图做了封装，通过 QRCodeEncode 类可�
                     .setCodeColor(0xFF000000) // 指定编码块颜色，默认为黑色
                     .setOutputBitmapWidth(dimension) // 生成图片宽度
                     .setOutputBitmapHeight(dimension) // 生成图片高度
-                    .setOutputBitmapMargin(0) // 设置为没有白边
+                    .setOutputBitmapPadding(0) // 设置为没有白边
                     .build();
 
     final Bitmap _QRCodeImage = encoder.encode("你的文本内容");
@@ -45,9 +45,16 @@ ZXingMini已对ZXing二维码解码部分做了封装。通过 QRCodeDecode 类�
 
 ```java
 
-    public class QRCodeScanActivity extends Activity{
+    private QRCodeSupport mQRCodeScanSupport;
 
-        private QRCodeScanSupport mQRCodeScanSupport;
+        private final Handler mHandler = new Handler();
+
+        private final Runnable mDelayAutoTask = new Runnable() {
+            @Override
+            public void run() {
+                mQRCodeScanSupport.startAuto(500);
+            }
+        };
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -56,35 +63,31 @@ ZXingMini已对ZXing二维码解码部分做了封装。通过 QRCodeDecode 类�
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             setContentView(R.layout.activity_scan);
 
-            // 查找布局文件中的元素
             ImageView capturePreview = (ImageView) findViewById(R.id.decode_preview);
-            final FinderView finderView = (FinderView) findViewById(R.id.capture_viewfinder_view);
             SurfaceView surfaceView = (SurfaceView) findViewById(R.id.capture_preview_view);
 
-            // 创建扫描支持类
-            mQRCodeScanSupport = new QRCodeScanSupport(surfaceView, finderView);
-            mQRCodeScanSupport.setCapturePreview(capturePreview);
-
-            // 如何处理扫描结果
-            mQRCodeScanSupport.setOnScanResultListener(new QRCodeScanSupport.OnScanResultListener() {
+            mQRCodeScanSupport = new QRCodeSupport(surfaceView, new QRCodeSupport.OnResultListener() {
                 @Override
                 public void onScanResult(String notNullResult) {
                     Toast.makeText(QRCodeScanActivity.this, "扫描结果: " + notNullResult, Toast.LENGTH_SHORT).show();
                 }
             });
+            mQRCodeScanSupport.setCapturePreview(capturePreview);
 
         }
 
         @Override
         protected void onResume() {
-            mQRCodeScanSupport.onResume(this);
             super.onResume();
+            mQRCodeScanSupport.onResume();
+            mHandler.postDelayed(mDelayAutoTask, 500);
         }
 
         @Override
         protected void onPause() {
-            mQRCodeScanSupport.onPause(this);
             super.onPause();
+            mQRCodeScanSupport.onPause();
+            mHandler.removeCallbacks(mDelayAutoTask);
         }
     }
 
@@ -94,5 +97,5 @@ ZXingMini已对ZXing二维码解码部分做了封装。通过 QRCodeDecode 类�
 
     dependencies {
         ...
-        compile 'com.github.yoojia:zxing:0.3@aar'
+        compile 'com.github.yoojia:zxing:0.6@aar'
     }

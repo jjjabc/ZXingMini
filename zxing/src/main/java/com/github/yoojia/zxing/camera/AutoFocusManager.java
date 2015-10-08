@@ -16,16 +16,17 @@ public class AutoFocusManager implements Camera.AutoFocusCallback{
     private final AutoFocusListener mAutoFocusListener;
     private final boolean mAutoFocusEnabled;
 
-    private final AtomicInteger mScheduleMs = new AtomicInteger(0);
+    private final AtomicInteger mPeriod = new AtomicInteger(0);
 
-    private final Handler mAutoFocusHandler = new Handler(Looper.getMainLooper());
+    private final Handler mFocusHandler = new Handler(Looper.getMainLooper());
 
-    private final Runnable mAutoFocusTask = new Runnable() {
-        @Override public void run() {
+    private final Runnable mFocusTask = new Runnable() {
+        @Override
+        public void run() {
             requestAutoFocus();
-            final int delay = mScheduleMs.get();
-            if (delay > 0) {
-                startAutoFocus(delay);
+            final int period = mPeriod.get();
+            if (period > 0) {
+                repeatAutoFocus(period);
             }
         }
     };
@@ -51,24 +52,24 @@ public class AutoFocusManager implements Camera.AutoFocusCallback{
     }
 
     public void startAutoFocus(int ms){
-        if (ms < 1000) {
-            throw new IllegalArgumentException("Auto Focus period tim to short !");
+        if (ms < 100) {
+            throw new IllegalArgumentException("Auto Focus period time must more than 100ms !");
         }
         if( ! mAutoFocusEnabled) {
             return;
         }
-        mAutoFocusHandler.removeCallbacks(mAutoFocusTask);
-        if (0 == mScheduleMs.get()){
-            mAutoFocusHandler.postDelayed(mAutoFocusTask, ms);
-        }else{
-            mAutoFocusHandler.post(mAutoFocusTask);
-        }
-        mScheduleMs.set(ms);
+        mFocusHandler.removeCallbacks(mFocusTask);
+        mPeriod.set(ms);
+        mFocusHandler.post(mFocusTask);
+    }
+
+    private void repeatAutoFocus(int period){
+        mFocusHandler.postDelayed(mFocusTask, period);
     }
 
     public void stopAutoFocus(){
-        mScheduleMs.set(0);
-        mAutoFocusHandler.removeCallbacks(mAutoFocusTask);
+        mPeriod.set(0);
+        mFocusHandler.removeCallbacks(mFocusTask);
     }
 
 }

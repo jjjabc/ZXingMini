@@ -45,127 +45,127 @@ public final class CameraManager {
     private static final int MAX_FRAME_WIDTH = 1200; // = 5/8 * 1920
     private static final int MAX_FRAME_HEIGHT = 675; // = 5/8 * 1080
 
-    private final Context context;
-    private Camera camera;
-    private AutoFocusManager autoFocusManager;
-    private Rect framingRect;
-    private Rect framingRectInPreview;
-    private boolean initialized;
-    private boolean previewing;
-    private int requestedFramingRectWidth;
-    private int requestedFramingRectHeight;
+    private final Context mContext;
 
-    private Point screenResolution;
-    private Point cameraResolution;
+    private Camera mCamera;
+    private AutoFocusManager mAutoFocusManager;
+
+    private Rect mFramingRect;
+    private Rect mFramingRectInPreview;
+
+    private boolean mInitialized;
+    private boolean mPreviewing;
+
+    private int mRequestedFramingRectWidth;
+    private int mRequestedFramingRectHeight;
+
+    private Point mScreenResolution;
+    private Point mCameraResolution;
 
     public CameraManager(Context context) {
-        this.context = context;
+        this.mContext = context;
     }
 
     public AutoFocusManager getAutoFocusManager() {
-        return autoFocusManager;
+        return mAutoFocusManager;
     }
 
     public void requestPreview(Camera.PreviewCallback callback){
-        camera.setOneShotPreviewCallback(callback);
+        mCamera.setOneShotPreviewCallback(callback);
     }
 
     /**
-     * Opens the camera driver and initializes the hardware parameters.
+     * Opens the mCamera driver and initializes the hardware parameters.
      *
-     * @param holder The surface object which the camera will draw preview frames into.
-     * @throws java.io.IOException Indicates the camera driver failed to open.
+     * @param holder The surface object which the mCamera will draw preview frames into.
+     * @throws java.io.IOException Indicates the mCamera driver failed to open.
      */
     public synchronized void openDriver(SurfaceHolder holder) throws IOException {
-        // 获取相机对象
-        Camera theCamera = camera;
-        if (theCamera == null) {
-            theCamera = OpenCameraInterface.open(OpenCameraInterface.NO_REQUESTED_CAMERA);
-            if (theCamera == null) {
-                throw new IOException();
+        Camera camera = mCamera;
+        if (camera == null) {
+            camera = OpenCameraInterface.open(OpenCameraInterface.NO_REQUESTED_CAMERA);
+            if (camera == null) {
+                throw new IOException("Cannot open camera device");
             }
-            camera = theCamera;
+            mCamera = camera;
         }
-        theCamera.setPreviewDisplay(holder);
-
-        // 设置预览方向。
-        // 注意：此设置不会影响到PreviewCallback回调、及其生成的Bitmap图片的数据方向，
-        theCamera.setDisplayOrientation(90);
-        if (!initialized) {
-            initialized = true;
-            initFromCameraParameters(theCamera);
-            if (requestedFramingRectWidth > 0 && requestedFramingRectHeight > 0) {
-                setManualFramingRect(requestedFramingRectWidth, requestedFramingRectHeight);
-                requestedFramingRectWidth = 0;
-                requestedFramingRectHeight = 0;
+        camera.setPreviewDisplay(holder);
+        // 设置预览方向。注意：此设置不会影响到PreviewCallback回调、及其生成的Bitmap图片的数据方向，
+        camera.setDisplayOrientation(90);
+        if (!mInitialized) {
+            mInitialized = true;
+            initFromCameraParameters(camera);
+            if (mRequestedFramingRectWidth > 0 && mRequestedFramingRectHeight > 0) {
+                setManualFramingRect(mRequestedFramingRectWidth, mRequestedFramingRectHeight);
+                mRequestedFramingRectWidth = 0;
+                mRequestedFramingRectHeight = 0;
             }
         }
-        Camera.Parameters parameters = theCamera.getParameters();
+        Camera.Parameters parameters = camera.getParameters();
         String parametersFlattened = parameters.flatten();
         try {
-            setDesiredCameraParameters(theCamera, false);
+            setDesiredCameraParameters(camera, false);
         } catch (RuntimeException re) {
             // Driver failed
             Log.e(TAG, "Camera rejected parameters. Setting only minimal safe-mode parameters");
             Log.e(TAG, "Resetting to saved camera params: " + parametersFlattened);
             // Reset:
-            parameters = theCamera.getParameters();
+            parameters = camera.getParameters();
             parameters.unflatten(parametersFlattened);
             try {
-                theCamera.setParameters(parameters);
-                setDesiredCameraParameters(theCamera, true);
+                camera.setParameters(parameters);
+                setDesiredCameraParameters(camera, true);
             } catch (RuntimeException re2) {
                 // Well, darn. Give up
                 Log.e(TAG, "> Camera rejected even safe-mode parameters! No configuration");
             }
         }
-
     }
 
     /**
      * @return 返回相机是否已开启
      */
     public synchronized boolean isOpen() {
-        return camera != null;
+        return mCamera != null;
     }
 
     /**
      * 如果相机被使用，则关闭它
      */
     public synchronized void closeDriver() {
-        if (camera != null) {
-            camera.release();
-            camera = null;
-            // Make sure to clear these each time we close the camera, so that any scanning rect
+        if (mCamera != null) {
+            mCamera.release();
+            mCamera = null;
+            // Make sure to clear these each time we close the mCamera, so that any scanning rect
             // requested by intent is forgotten.
-            framingRect = null;
-            framingRectInPreview = null;
+            mFramingRect = null;
+            mFramingRectInPreview = null;
         }
     }
 
     /**
-     * Asks the camera hardware to begin drawing preview frames to the screen.
+     * Asks the mCamera hardware to begin drawing preview frames to the screen.
      */
     public synchronized void startPreview(AutoFocusListener autoFocusListener) {
-        Camera theCamera = camera;
-        if (theCamera != null && !previewing) {
-            theCamera.startPreview();
-            previewing = true;
-            autoFocusManager = new AutoFocusManager(camera, autoFocusListener);
+        Camera camera = mCamera;
+        if (camera != null && !mPreviewing) {
+            camera.startPreview();
+            mPreviewing = true;
+            mAutoFocusManager = new AutoFocusManager(mCamera, autoFocusListener);
         }
     }
 
     /**
-     * Tells the camera to stop drawing preview frames.
+     * Tells the mCamera to stop drawing preview frames.
      */
     public synchronized void stopPreview() {
-        if (autoFocusManager != null) {
-            autoFocusManager.stopAutoFocus();
-            autoFocusManager = null;
+        if (mAutoFocusManager != null) {
+            mAutoFocusManager.stopAutoFocus();
+            mAutoFocusManager = null;
         }
-        if (camera != null && previewing) {
-            camera.stopPreview();
-            previewing = false;
+        if (mCamera != null && mPreviewing) {
+            mCamera.stopPreview();
+            mPreviewing = false;
         }
     }
 
@@ -176,23 +176,23 @@ public final class CameraManager {
      * @return The rectangle to draw on screen in window coordinates.
      */
     public synchronized Rect getFramingRect() {
-        if (framingRect == null) {
-            if (camera == null) {
+        if (mFramingRect == null) {
+            if (mCamera == null) {
                 return null;
             }
-            if (screenResolution == null) {
+            if (mScreenResolution == null) {
                 // Called early, before init even finished
                 return null;
             }
-            int width = findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH);
-            int height = findDesiredDimensionInRange(screenResolution.y, MIN_FRAME_HEIGHT, MAX_FRAME_HEIGHT);
+            int width = findDesiredDimensionInRange(mScreenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH);
+            int height = findDesiredDimensionInRange(mScreenResolution.y, MIN_FRAME_HEIGHT, MAX_FRAME_HEIGHT);
 
-            int leftOffset = (screenResolution.x - width) / 2;
-            int topOffset = (screenResolution.y - height) / 2;
-            framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
-            Log.d(TAG, "Calculated framing rect: " + framingRect);
+            int leftOffset = (mScreenResolution.x - width) / 2;
+            int topOffset = (mScreenResolution.y - height) / 2;
+            mFramingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
+            Log.d(TAG, "Calculated framing rect: " + mFramingRect);
         }
-        return framingRect;
+        return mFramingRect;
     }
 
     /**
@@ -202,23 +202,23 @@ public final class CameraManager {
      * @return {@link android.graphics.Rect} expressing barcode scan area in terms of the preview size
      */
     public synchronized Rect getFramingRectInPreview() {
-        if (framingRectInPreview == null) {
+        if (mFramingRectInPreview == null) {
             Rect framingRect = getFramingRect();
             if (framingRect == null) {
                 return null;
             }
             Rect rect = new Rect(framingRect);
-            if (cameraResolution == null || screenResolution == null) {
+            if (mCameraResolution == null || mScreenResolution == null) {
                 // Called early, before init even finished
                 return null;
             }
-            rect.left = rect.left * cameraResolution.x / screenResolution.x;
-            rect.right = rect.right * cameraResolution.x / screenResolution.x;
-            rect.top = rect.top * cameraResolution.y / screenResolution.y;
-            rect.bottom = rect.bottom * cameraResolution.y / screenResolution.y;
-            framingRectInPreview = rect;
+            rect.left = rect.left * mCameraResolution.x / mScreenResolution.x;
+            rect.right = rect.right * mCameraResolution.x / mScreenResolution.x;
+            rect.top = rect.top * mCameraResolution.y / mScreenResolution.y;
+            rect.bottom = rect.bottom * mCameraResolution.y / mScreenResolution.y;
+            mFramingRectInPreview = rect;
         }
-        return framingRectInPreview;
+        return mFramingRectInPreview;
     }
 
     /**
@@ -229,21 +229,21 @@ public final class CameraManager {
      * @param height The height in pixels to scan.
      */
     public synchronized void setManualFramingRect(int width, int height) {
-        if (initialized) {
-            if (width > screenResolution.x) {
-                width = screenResolution.x;
+        if (mInitialized) {
+            if (width > mScreenResolution.x) {
+                width = mScreenResolution.x;
             }
-            if (height > screenResolution.y) {
-                height = screenResolution.y;
+            if (height > mScreenResolution.y) {
+                height = mScreenResolution.y;
             }
-            int leftOffset = (screenResolution.x - width) / 2;
-            int topOffset = (screenResolution.y - height) / 2;
-            framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
-            Log.d(TAG, "Calculated manual framing rect: " + framingRect);
-            framingRectInPreview = null;
+            int leftOffset = (mScreenResolution.x - width) / 2;
+            int topOffset = (mScreenResolution.y - height) / 2;
+            mFramingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
+            Log.d(TAG, "Calculated manual framing rect: " + mFramingRect);
+            mFramingRectInPreview = null;
         } else {
-            requestedFramingRectWidth = width;
-            requestedFramingRectHeight = height;
+            mRequestedFramingRectWidth = width;
+            mRequestedFramingRectHeight = height;
         }
     }
 
@@ -268,18 +268,18 @@ public final class CameraManager {
 
 
     /**
-     * Reads, one time, values from the camera that are needed by the app.
+     * Reads, one time, values from the mCamera that are needed by the app.
      */
     private void initFromCameraParameters(Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
-        WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        WindowManager manager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         Display display = manager.getDefaultDisplay();
         Point theScreenResolution = new Point();
         display.getSize(theScreenResolution);
-        screenResolution = theScreenResolution;
-        Log.i(TAG, "Screen resolution: " + screenResolution);
-        cameraResolution = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, screenResolution);
-        Log.i(TAG, "Camera resolution: " + cameraResolution);
+        mScreenResolution = theScreenResolution;
+        Log.i(TAG, "Screen resolution: " + mScreenResolution);
+        mCameraResolution = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, mScreenResolution);
+        Log.i(TAG, "Camera resolution: " + mCameraResolution);
 
     }
 
@@ -289,15 +289,15 @@ public final class CameraManager {
                 true, // auto focus
                 true, // disable continuous
                 safeMode);
-        parameters.setPreviewSize(cameraResolution.x, cameraResolution.y);
+        parameters.setPreviewSize(mCameraResolution.x, mCameraResolution.y);
         camera.setParameters(parameters);
         Camera.Parameters afterParameters = camera.getParameters();
         Camera.Size afterSize = afterParameters.getPreviewSize();
-        if (afterSize != null && (cameraResolution.x != afterSize.width || cameraResolution.y != afterSize.height)) {
-            Log.w(TAG, "Camera said it supported preview size " + cameraResolution.x + 'x' + cameraResolution.y +
+        if (afterSize != null && (mCameraResolution.x != afterSize.width || mCameraResolution.y != afterSize.height)) {
+            Log.w(TAG, "Camera said it supported preview size " + mCameraResolution.x + 'x' + mCameraResolution.y +
                     ", but after setting it, preview size is " + afterSize.width + 'x' + afterSize.height);
-            cameraResolution.x = afterSize.width;
-            cameraResolution.y = afterSize.height;
+            mCameraResolution.x = afterSize.width;
+            mCameraResolution.y = afterSize.height;
         }
     }
 

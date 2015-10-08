@@ -6,7 +6,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.ImageView;
 
-import com.github.yoojia.zxing.camera.Cameras;
+import com.github.yoojia.zxing.camera.CameraController;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
@@ -17,19 +17,18 @@ public class QRCodeSupport {
 
     public static final String TAG = QRCodeSupport.class.getSimpleName();
 
-    private final Cameras mCameras;
+    private final CameraController mCameraController;
     private final Decoder mQRCodeDecode = new Decoder.Builder().build();
     private ImageView mCapturePreview = null;
-    private OnScanResultListener mOnScanResultListener;
+    private OnResultListener mOnResultListener;
 
-    public QRCodeSupport(SurfaceView surfaceView, FinderView finderView) {
-        this(surfaceView, finderView, null);
+    public QRCodeSupport(SurfaceView surfaceView) {
+        this(surfaceView, null);
     }
 
-    public QRCodeSupport(SurfaceView surfaceView, FinderView finderView, OnScanResultListener listener) {
-        mCameras = new Cameras(surfaceView);
-        finderView.setCameraManager(mCameras.getCameraManager());
-        mCameras.setPreviewCallback(new Camera.PreviewCallback() {
+    public QRCodeSupport(SurfaceView surfaceView, OnResultListener listener) {
+        mCameraController = new CameraController(surfaceView);
+        mCameraController.setPreviewCallback(new Camera.PreviewCallback() {
             private PreviewQRCodeDecodeTask mDecodeTask;
             @Override
             public void onPreviewFrame(byte[] data, Camera camera) {
@@ -41,19 +40,19 @@ public class QRCodeSupport {
                 mDecodeTask.execute(preview);
             }
         });
-        mOnScanResultListener = listener;
+        mOnResultListener = listener;
     }
 
     public void onResume(){
-        mCameras.onResume();
+        mCameraController.resume();
     }
 
     public void onPause(){
-        mCameras.onPause();
+        mCameraController.pause();
     }
 
-    public void setOnScanResultListener(OnScanResultListener onScanResultListener) {
-        mOnScanResultListener = onScanResultListener;
+    public void setOnResultListener(OnResultListener onResultListener) {
+        mOnResultListener = onResultListener;
     }
 
     public void setCapturePreview(ImageView capturePreview){
@@ -61,7 +60,15 @@ public class QRCodeSupport {
     }
 
     public void requestDecode(){
-        mCameras.getCameraManager().getAutoFocusManager().requestAutoFocus();
+        mCameraController.getCameraManager().getAutoFocusManager().requestAutoFocus();
+    }
+
+    public void startAuto(int period){
+        mCameraController.getCameraManager().getAutoFocusManager().startAutoFocus(period);
+    }
+
+    public void stopAuto(){
+        mCameraController.getCameraManager().getAutoFocusManager().stopAutoFocus();
     }
 
     private class PreviewQRCodeDecodeTask extends DecodeTask {
@@ -72,10 +79,10 @@ public class QRCodeSupport {
 
         @Override
         protected void onPostDecoded(String result) {
-            if (mOnScanResultListener == null){
+            if (mOnResultListener == null){
                 Log.w(TAG, "WARNING ! QRCode result ignored !");
             }else{
-                mOnScanResultListener.onScanResult(result);
+                mOnResultListener.onScanResult(result);
             }
         }
 
@@ -87,7 +94,7 @@ public class QRCodeSupport {
         }
     }
 
-    public interface OnScanResultListener{
+    public interface OnResultListener {
         void onScanResult(String notNullResult);
     }
 }

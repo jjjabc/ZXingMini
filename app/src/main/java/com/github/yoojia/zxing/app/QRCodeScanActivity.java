@@ -2,6 +2,7 @@ package com.github.yoojia.zxing.app;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
@@ -22,6 +23,15 @@ public class QRCodeScanActivity extends Activity{
 
     private QRCodeSupport mQRCodeScanSupport;
 
+    private final Handler mHandler = new Handler();
+
+    private final Runnable mDelayAutoTask = new Runnable() {
+        @Override
+        public void run() {
+            mQRCodeScanSupport.startAuto(500);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,37 +40,29 @@ public class QRCodeScanActivity extends Activity{
         setContentView(R.layout.activity_scan);
 
         ImageView capturePreview = (ImageView) findViewById(R.id.decode_preview);
-        final FinderView finderView = (FinderView) findViewById(R.id.capture_viewfinder_view);
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.capture_preview_view);
 
-        mQRCodeScanSupport = new QRCodeSupport(surfaceView, finderView);
-        mQRCodeScanSupport.setCapturePreview(capturePreview);
-
-        // 如何处理扫描结果
-        mQRCodeScanSupport.setOnScanResultListener(new QRCodeSupport.OnScanResultListener() {
+        mQRCodeScanSupport = new QRCodeSupport(surfaceView, new QRCodeSupport.OnResultListener() {
             @Override
             public void onScanResult(String notNullResult) {
                 Toast.makeText(QRCodeScanActivity.this, "扫描结果: " + notNullResult, Toast.LENGTH_SHORT).show();
             }
         });
+        mQRCodeScanSupport.setCapturePreview(capturePreview);
 
-        finderView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mQRCodeScanSupport.requestDecode();
-            }
-        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mQRCodeScanSupport.onResume();
+        mHandler.postDelayed(mDelayAutoTask, 500);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mQRCodeScanSupport.onPause();
+        mHandler.removeCallbacks(mDelayAutoTask);
     }
 }

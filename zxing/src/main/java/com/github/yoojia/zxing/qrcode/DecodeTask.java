@@ -16,7 +16,7 @@ import java.io.ByteArrayOutputStream;
  * @date :   2015-03-03
  * 二维码解码线程
  */
-public abstract class DecodeTask extends AsyncTask<DecodeTask.CameraPreview, Bitmap, String>{
+public abstract class DecodeTask extends AsyncTask<DecodeTask.CameraPreview, Bitmap, String> {
 
     private final Decoder mQRCodeDecode;
 

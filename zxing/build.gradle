@@ -13,7 +13,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'com.github.yoojia'
-version = '0.5'
+version = '0.6'
 
 android {
     compileSdkVersion 21
@@ -37,7 +37,6 @@ android {
 dependencies {
     compile 'com.google.zxing:core:3.2.1'
     compile 'com.google.zxing:android-core:3.2.1'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 tasks.withType(JavaCompile) {
@@ -124,8 +123,4 @@ javadoc {
 artifacts {
     archives javadocJar
     archives sourcesJar
-}
-
-task findConventions << {
-    println project.getConvention()
 }
