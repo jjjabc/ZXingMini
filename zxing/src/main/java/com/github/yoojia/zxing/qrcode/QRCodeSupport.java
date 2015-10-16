@@ -10,7 +10,7 @@ import com.github.yoojia.zxing.camera.CameraController;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
- * @date :   2015-03-05
+ * @since 1.0
  * 封装扫描支持功能
  */
 public class QRCodeSupport {

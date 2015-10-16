@@ -19,6 +19,7 @@ import com.github.yoojia.qrcode.R;
  * - 屏幕中间模拟激光扫描线效果的View。它是个纯粹的动画，与二维码识别过程没有任何关系。
  * @author dswitkin@google.com (Daniel Switkin)
  * @author yoojiachen@gmail.com (Yoojia.Chen)
+ * @since 1.0
  */
 public final class FinderView extends View {
 

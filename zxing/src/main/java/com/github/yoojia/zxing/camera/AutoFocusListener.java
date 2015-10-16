@@ -2,7 +2,6 @@ package com.github.yoojia.zxing.camera;
 
 /**
  * @author :   Yoojia.Chen (yoojiachen@163.com)
- * @date :   2015-03-02
  * 自动聚焦回调接口
  */
 public interface AutoFocusListener {

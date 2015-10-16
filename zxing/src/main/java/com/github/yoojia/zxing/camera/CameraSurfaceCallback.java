@@ -4,7 +4,7 @@ import android.view.SurfaceHolder;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
- * 2015-03-03
+ * @since 1.0
  * 照相机预览接口，隐藏无用的接口
  */
 public abstract class CameraSurfaceCallback implements SurfaceHolder.Callback {

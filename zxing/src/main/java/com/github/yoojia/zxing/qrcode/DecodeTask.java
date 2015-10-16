@@ -13,7 +13,7 @@ import java.io.ByteArrayOutputStream;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
- * @date :   2015-03-03
+ * @since 1.0
  * 二维码解码线程
  */
 public abstract class DecodeTask extends AsyncTask<DecodeTask.CameraPreview, Bitmap, String> {

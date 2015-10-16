@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
- * @date :   2015-03-03
+ * @since 1.0
  * 二维码图片解码成文本信息
  */
 public class Decoder {

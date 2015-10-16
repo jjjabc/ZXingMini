@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * @author :   Yoojia.Chen (yoojia.chen@gmail.com)
- * @date :   2015-03-03
+ * @since 1.0
  * 将文本信息生成QRCode图片
  */
 public final class Encoder {
