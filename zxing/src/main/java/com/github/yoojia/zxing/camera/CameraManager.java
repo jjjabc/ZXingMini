@@ -85,7 +85,7 @@ public final class CameraManager {
         if (camera == null) {
             camera = OpenCameraInterface.open(OpenCameraInterface.NO_REQUESTED_CAMERA);
             if (camera == null) {
-                throw new IOException("Cannot open camera device");
+                throw new IOException("Fail to open camera device !");
             }
             mCamera = camera;
         }
@@ -245,6 +245,10 @@ public final class CameraManager {
             mRequestedFramingRectWidth = width;
             mRequestedFramingRectHeight = height;
         }
+    }
+
+    public Camera getCamera() {
+        return mCamera;
     }
 
     /**

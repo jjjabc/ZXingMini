@@ -67,7 +67,12 @@ public class CameraController {
     }
 
     public void requestFocus(){
-        mCameraManager.getAutoFocusManager().requestAutoFocus();
+        final AutoFocusManager focusManager = mCameraManager.getAutoFocusManager();
+        if (focusManager != null) {
+            focusManager.requestAutoFocus();
+        }else{
+            Log.e(TAG, "- Request auto focus, buy camera was STOP !");
+        }
     }
 
     public CameraManager getCameraManager() {
