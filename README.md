@@ -97,5 +97,7 @@ ZXingMini已对ZXing二维码解码部分做了封装。通过 QRCodeDecode 类�
 
     dependencies {
         ...
+        compile 'com.google.zxing:core:3.2.1'
+        compile 'com.google.zxing:android-core:3.2.1'
         compile 'com.github.yoojia:zxing:0.7@aar'
     }
