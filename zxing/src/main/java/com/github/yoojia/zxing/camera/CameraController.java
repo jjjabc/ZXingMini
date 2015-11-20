@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 public class CameraController {
 
-    private final static String TAG = "CAMERAS";
+    private final static String TAG = CameraController.class.getSimpleName();
 
     private final CameraManager mCameraManager;
     private final SurfaceView mSurfaceView;
@@ -27,7 +27,16 @@ public class CameraController {
     private final CameraSurfaceCallback mCameraSurfaceCallback = new CameraSurfaceCallback() {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            initCamera(holder);
+            if (mCameraManager.isOpen()){
+                return;
+            }
+            try {
+                mCameraManager.openDriver(holder);
+            }catch (IOException ioe) {
+                Log.w(TAG, ioe);
+                return;
+            }
+            mCameraManager.startPreview(mAutoFocusListener);
         }
     };
 
@@ -48,33 +57,45 @@ public class CameraController {
         mSurfaceView = surfaceView;
     }
 
-    /**
-     * 跟随Activity的生命周期
-     */
+    @Deprecated
     public void resume(){
+        onResume();
+    }
+
+    public void onResume(){
         final SurfaceHolder holder = mSurfaceView.getHolder();
         holder.addCallback(mCameraSurfaceCallback);
     }
 
-    /**
-     * 跟随Activity的生命周期
-     */
-    public void pause(){
+    @Deprecated
+    public void pause() {
+        onPause();
+    }
+
+    public void onPause(){
+        // 暂停相机
         final SurfaceHolder holder = mSurfaceView.getHolder();
         holder.removeCallback(mCameraSurfaceCallback);
         mCameraManager.stopPreview();
         mCameraManager.closeDriver();
     }
 
+    /**
+     * 请求相机对焦
+     */
     public void requestFocus(){
         final AutoFocusManager focusManager = mCameraManager.getAutoFocusManager();
         if (focusManager != null) {
             focusManager.requestAutoFocus();
         }else{
-            Log.e(TAG, "- Request auto focus, buy camera was STOP !");
+            Log.e(TAG, "- Request auto focus, but camera was STOP !");
         }
     }
 
+    /**
+     * 获取相机管理器
+     * @return 非空,相机管理器
+     */
     public CameraManager getCameraManager() {
         return mCameraManager;
     }
@@ -103,19 +124,6 @@ public class CameraController {
         final int offsetX = originWidth > originHeight ? (originWidth - originHeight): 0;
         final int offsetY = originWidth > originHeight ? 0 : (originHeight - originWidth);
         return Bitmap.createBitmap(src, offsetX, offsetY, targetWH, targetWH, matrix, true);
-    }
-
-    private void initCamera(SurfaceHolder holder){
-        if (mCameraManager.isOpen()){
-            return;
-        }
-        try {
-            mCameraManager.openDriver(holder);
-        }catch (IOException ioe) {
-            Log.w(TAG, ioe);
-            return;
-        }
-        mCameraManager.startPreview(mAutoFocusListener);
     }
 
     public static final class CameraPreview{

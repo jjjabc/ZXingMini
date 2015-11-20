@@ -74,47 +74,39 @@ public final class CameraManager {
         mCamera.setOneShotPreviewCallback(callback);
     }
 
-    /**
-     * Opens the mCamera driver and initializes the hardware parameters.
-     *
-     * @param holder The surface object which the mCamera will draw preview frames into.
-     * @throws java.io.IOException Indicates the mCamera driver failed to open.
-     */
     public synchronized void openDriver(SurfaceHolder holder) throws IOException {
-        Camera camera = mCamera;
-        if (camera == null) {
-            camera = OpenCameraInterface.open(OpenCameraInterface.NO_REQUESTED_CAMERA);
-            if (camera == null) {
+        if (mCamera == null) {
+            mCamera = OpenCameraInterface.open(OpenCameraInterface.NO_REQUESTED_CAMERA);
+            if (mCamera == null) {
                 throw new IOException("Fail to open camera device !");
             }
-            mCamera = camera;
         }
-        camera.setPreviewDisplay(holder);
+        mCamera.setPreviewDisplay(holder);
         // 设置预览方向。注意：此设置不会影响到PreviewCallback回调、及其生成的Bitmap图片的数据方向，
-        camera.setDisplayOrientation(90);
+        mCamera.setDisplayOrientation(90);
         if (!mInitialized) {
             mInitialized = true;
-            initFromCameraParameters(camera);
+            initFromCameraParameters(mCamera);
             if (mRequestedFramingRectWidth > 0 && mRequestedFramingRectHeight > 0) {
                 setManualFramingRect(mRequestedFramingRectWidth, mRequestedFramingRectHeight);
                 mRequestedFramingRectWidth = 0;
                 mRequestedFramingRectHeight = 0;
             }
         }
-        Camera.Parameters parameters = camera.getParameters();
+        Camera.Parameters parameters = mCamera.getParameters();
         String parametersFlattened = parameters.flatten();
         try {
-            setDesiredCameraParameters(camera, false);
+            setDesiredCameraParameters(mCamera, false);
         } catch (RuntimeException re) {
             // Driver failed
             Log.e(TAG, "Camera rejected parameters. Setting only minimal safe-mode parameters");
             Log.e(TAG, "Resetting to saved camera params: " + parametersFlattened);
             // Reset:
-            parameters = camera.getParameters();
+            parameters = mCamera.getParameters();
             parameters.unflatten(parametersFlattened);
             try {
-                camera.setParameters(parameters);
-                setDesiredCameraParameters(camera, true);
+                mCamera.setParameters(parameters);
+                setDesiredCameraParameters(mCamera, true);
             } catch (RuntimeException re2) {
                 // Well, darn. Give up
                 Log.e(TAG, "> Camera rejected even safe-mode parameters! No configuration");
@@ -133,11 +125,9 @@ public final class CameraManager {
      * 如果相机被使用，则关闭它
      */
     public synchronized void closeDriver() {
-        if (mCamera != null) {
+        if (isOpen()) {
             mCamera.release();
             mCamera = null;
-            // Make sure to clear these each time we close the mCamera, so that any scanning rect
-            // requested by intent is forgotten.
             mFramingRect = null;
             mFramingRectInPreview = null;
         }
@@ -147,9 +137,8 @@ public final class CameraManager {
      * Asks the mCamera hardware to begin drawing preview frames to the screen.
      */
     public synchronized void startPreview(AutoFocusListener autoFocusListener) {
-        Camera camera = mCamera;
-        if (camera != null && !mPreviewing) {
-            camera.startPreview();
+        if (mCamera != null && !mPreviewing) {
+            mCamera.startPreview();
             mPreviewing = true;
             mAutoFocusManager = new AutoFocusManager(mCamera, autoFocusListener);
         }
