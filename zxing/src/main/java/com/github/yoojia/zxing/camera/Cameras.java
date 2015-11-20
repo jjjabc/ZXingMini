@@ -57,7 +57,7 @@ public class Cameras {
         final SurfaceHolder holder = mSurfaceView.getHolder();
         holder.removeCallback(mCameraSurfaceCallback);
         mCameraManager.stopPreview();
-        mCameraManager.closeDriver();
+        mCameraManager.close();
     }
 
     public CameraManager getCameraManager() {
@@ -92,7 +92,7 @@ public class Cameras {
             return;
         }
         try {
-            mCameraManager.openDriver(holder);
+            mCameraManager.open(holder);
         }catch (IOException ioe) {
             Log.w(TAG, ioe);
         }

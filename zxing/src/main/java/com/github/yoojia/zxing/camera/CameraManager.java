@@ -25,7 +25,6 @@ import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
-import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.client.android.camera.CameraConfigurationUtils;
 
 import java.io.IOException;
@@ -35,15 +34,11 @@ import java.io.IOException;
  * implementation encapsulates the steps needed to take preview-sized images, which are used for
  * both preview and decoding.
  * @author dswitkin@google.com (Daniel Switkin)
+ * @author 陈小锅 (yoojia.chen@gmail.com)
  */
 public final class CameraManager {
 
     private static final String TAG = CameraManager.class.getSimpleName();
-
-    private static final int MIN_FRAME_WIDTH = 240;
-    private static final int MIN_FRAME_HEIGHT = 240;
-    private static final int MAX_FRAME_WIDTH = 1200; // = 5/8 * 1920
-    private static final int MAX_FRAME_HEIGHT = 675; // = 5/8 * 1080
 
     private final Context mContext;
 
@@ -51,7 +46,6 @@ public final class CameraManager {
     private FocusManager mFocusManager;
 
     private Rect mFramingRect;
-    private Rect mFramingRectInPreview;
 
     private boolean mInitialized;
     private boolean mPreviewing;
@@ -74,7 +68,7 @@ public final class CameraManager {
         mCamera.setOneShotPreviewCallback(callback);
     }
 
-    public synchronized void openDriver(SurfaceHolder holder) throws IOException {
+    public synchronized void open(SurfaceHolder holder) throws IOException {
         if (mCamera == null) {
             mCamera = OpenCameraInterface.open(OpenCameraInterface.NO_REQUESTED_CAMERA);
             if (mCamera == null) {
@@ -124,18 +118,14 @@ public final class CameraManager {
     /**
      * 如果相机被使用，则关闭它
      */
-    public synchronized void closeDriver() {
+    public synchronized void close() {
         if (isOpen()) {
             mCamera.release();
             mCamera = null;
             mFramingRect = null;
-            mFramingRectInPreview = null;
         }
     }
 
-    /**
-     * Asks the camera hardware to begin drawing preview frames to the screen.
-     */
     public synchronized void startPreview(FocusEventsListener focusEventsListener) {
         if (mCamera != null && !mPreviewing) {
             mCamera.startPreview();
@@ -144,9 +134,6 @@ public final class CameraManager {
         }
     }
 
-    /**
-     * Tells the mCamera to stop drawing preview frames.
-     */
     public synchronized void stopPreview() {
         if (mFocusManager != null) {
             mFocusManager.stopAutoFocus();
@@ -158,65 +145,6 @@ public final class CameraManager {
         }
     }
 
-    /**
-     * Calculates the framing rect which the UI should draw to show the user where to place the
-     * barcode. This target helps with alignment as well as forces the user to hold the device
-     * far enough away to ensure the image will be in focus.
-     * @return The rectangle to draw on screen in window coordinates.
-     */
-    public synchronized Rect getFramingRect() {
-        if (mFramingRect == null) {
-            if (mCamera == null) {
-                return null;
-            }
-            if (mScreenResolution == null) {
-                // Called early, before init even finished
-                return null;
-            }
-            int width = findDesiredDimensionInRange(mScreenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH);
-            int height = findDesiredDimensionInRange(mScreenResolution.y, MIN_FRAME_HEIGHT, MAX_FRAME_HEIGHT);
-
-            int leftOffset = (mScreenResolution.x - width) / 2;
-            int topOffset = (mScreenResolution.y - height) / 2;
-            mFramingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
-            Log.d(TAG, "Calculated framing rect: " + mFramingRect);
-        }
-        return mFramingRect;
-    }
-
-    /**
-     * Like {@link #getFramingRect} but coordinates are in terms of the preview frame,
-     * not UI / screen.
-     *
-     * @return {@link android.graphics.Rect} expressing barcode scan area in terms of the preview size
-     */
-    public synchronized Rect getFramingRectInPreview() {
-        if (mFramingRectInPreview == null) {
-            Rect framingRect = getFramingRect();
-            if (framingRect == null) {
-                return null;
-            }
-            Rect rect = new Rect(framingRect);
-            if (mCameraResolution == null || mScreenResolution == null) {
-                // Called early, before init even finished
-                return null;
-            }
-            rect.left = rect.left * mCameraResolution.x / mScreenResolution.x;
-            rect.right = rect.right * mCameraResolution.x / mScreenResolution.x;
-            rect.top = rect.top * mCameraResolution.y / mScreenResolution.y;
-            rect.bottom = rect.bottom * mCameraResolution.y / mScreenResolution.y;
-            mFramingRectInPreview = rect;
-        }
-        return mFramingRectInPreview;
-    }
-
-    /**
-     * Allows third party apps to specify the scanning rectangle dimensions, rather than determine
-     * them automatically based on screen resolution.
-     *
-     * @param width  The width in pixels to scan.
-     * @param height The height in pixels to scan.
-     */
     public synchronized void setManualFramingRect(int width, int height) {
         if (mInitialized) {
             if (width > mScreenResolution.x) {
@@ -229,7 +157,6 @@ public final class CameraManager {
             int topOffset = (mScreenResolution.y - height) / 2;
             mFramingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
             Log.d(TAG, "Calculated manual framing rect: " + mFramingRect);
-            mFramingRectInPreview = null;
         } else {
             mRequestedFramingRectWidth = width;
             mRequestedFramingRectHeight = height;
@@ -240,29 +167,6 @@ public final class CameraManager {
         return mCamera;
     }
 
-    /**
-     * A factory method to build the appropriate LuminanceSource object based on the format
-     * of the preview buffers, as described by Camera.Parameters.
-     *
-     * @param data   A preview frame.
-     * @param width  The width of the image.
-     * @param height The height of the image.
-     * @return A PlanarYUVLuminanceSource instance.
-     */
-    public PlanarYUVLuminanceSource buildLuminanceSource(byte[] data, int width, int height) {
-        Rect rect = getFramingRectInPreview();
-        if (rect == null) {
-            return null;
-        }
-        // Go ahead and assume it's YUV rather than die.
-        return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
-                rect.width(), rect.height(), false);
-    }
-
-
-    /**
-     * Reads, one time, values from the mCamera that are needed by the app.
-     */
     private void initFromCameraParameters(Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
         WindowManager manager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);

@@ -2,7 +2,7 @@ package com.github.yoojia.zxing.camera;
 
 /**
  * 自动聚焦回调接口
- * @author :   YOOJIA.CHEN (yoojiachen@gmail.com)
+ * @author 陈小锅 (yoojia.chen@gmail.com)
  */
 public interface FocusEventsListener {
 
