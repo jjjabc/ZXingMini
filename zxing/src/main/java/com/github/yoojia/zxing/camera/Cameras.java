@@ -31,7 +31,7 @@ public class Cameras {
         }
     };
 
-    private final AutoFocusListener mAutoFocusListener = new AutoFocusListener() {
+    private final FocusEventsListener mFocusEventsListener = new FocusEventsListener() {
         @Override
         public void onFocus(boolean focusSuccess) {
             // 对焦成功后，请求触发生成 **一次** 预览图片
@@ -99,7 +99,7 @@ public class Cameras {
         if (mPreviewCallback != null){
             mCameraManager.requestPreview(mPreviewCallback);
         }
-        mCameraManager.startPreview(mAutoFocusListener);
+        mCameraManager.startPreview(mFocusEventsListener);
     }
 
     public static final class CameraPreview{

@@ -44,7 +44,7 @@ public class CameraActivity extends Activity{
         surfaceView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCamera.getCameraManager().getAutoFocusManager().requestAutoFocus();
+                mCamera.getCameraManager().getFocusManager().requestAutoFocus();
             }
         });
     }

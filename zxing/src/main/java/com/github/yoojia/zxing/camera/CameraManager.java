@@ -48,7 +48,7 @@ public final class CameraManager {
     private final Context mContext;
 
     private Camera mCamera;
-    private AutoFocusManager mAutoFocusManager;
+    private FocusManager mFocusManager;
 
     private Rect mFramingRect;
     private Rect mFramingRectInPreview;
@@ -66,8 +66,8 @@ public final class CameraManager {
         this.mContext = context;
     }
 
-    public AutoFocusManager getAutoFocusManager() {
-        return mAutoFocusManager;
+    public FocusManager getFocusManager() {
+        return mFocusManager;
     }
 
     public void requestPreview(Camera.PreviewCallback callback){
@@ -134,13 +134,13 @@ public final class CameraManager {
     }
 
     /**
-     * Asks the mCamera hardware to begin drawing preview frames to the screen.
+     * Asks the camera hardware to begin drawing preview frames to the screen.
      */
-    public synchronized void startPreview(AutoFocusListener autoFocusListener) {
+    public synchronized void startPreview(FocusEventsListener focusEventsListener) {
         if (mCamera != null && !mPreviewing) {
             mCamera.startPreview();
             mPreviewing = true;
-            mAutoFocusManager = new AutoFocusManager(mCamera, autoFocusListener);
+            mFocusManager = new FocusManager(mCamera, focusEventsListener);
         }
     }
 
@@ -148,9 +148,9 @@ public final class CameraManager {
      * Tells the mCamera to stop drawing preview frames.
      */
     public synchronized void stopPreview() {
-        if (mAutoFocusManager != null) {
-            mAutoFocusManager.stopAutoFocus();
-            mAutoFocusManager = null;
+        if (mFocusManager != null) {
+            mFocusManager.stopAutoFocus();
+            mFocusManager = null;
         }
         if (mCamera != null && mPreviewing) {
             mCamera.stopPreview();

@@ -1,14 +1,8 @@
 package com.github.yoojia.zxing.camera;
 
 /**
- * @author :   Yoojia.Chen (yoojiachen@163.com)
- * 自动聚焦回调接口
+ * @author YOOJIA.CHEN (yoojiachen@gmail.com)
  */
-public interface AutoFocusListener {
-
-    /**
-     * 聚集完成时此接口被回调
-     * @param focusSuccess 是否聚集成功
-     */
-    void onFocus(boolean focusSuccess);
+@Deprecated
+public interface AutoFocusListener extends FocusEventsListener{
 }

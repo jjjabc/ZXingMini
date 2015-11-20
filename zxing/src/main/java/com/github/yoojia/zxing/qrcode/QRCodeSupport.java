@@ -60,15 +60,15 @@ public class QRCodeSupport {
     }
 
     public void requestDecode(){
-        mCameraController.getCameraManager().getAutoFocusManager().requestAutoFocus();
+        mCameraController.getCameraManager().getFocusManager().requestAutoFocus();
     }
 
     public void startAuto(int period){
-        mCameraController.getCameraManager().getAutoFocusManager().startAutoFocus(period);
+        mCameraController.getCameraManager().getFocusManager().startAutoFocus(period);
     }
 
     public void stopAuto(){
-        mCameraController.getCameraManager().getAutoFocusManager().stopAutoFocus();
+        mCameraController.getCameraManager().getFocusManager().stopAutoFocus();
     }
 
     private class PreviewQRCodeDecodeTask extends DecodeTask {

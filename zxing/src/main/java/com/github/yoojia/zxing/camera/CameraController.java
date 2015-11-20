@@ -36,11 +36,11 @@ public class CameraController {
                 Log.w(TAG, ioe);
                 return;
             }
-            mCameraManager.startPreview(mAutoFocusListener);
+            mCameraManager.startPreview(mFocusEventsListener);
         }
     };
 
-    private final AutoFocusListener mAutoFocusListener = new AutoFocusListener() {
+    private final FocusEventsListener mFocusEventsListener = new FocusEventsListener() {
         @Override
         public void onFocus(boolean focusSuccess) {
             // 对焦成功后，请求触发生成 **一次** 预览图片
@@ -84,7 +84,7 @@ public class CameraController {
      * 请求相机对焦
      */
     public void requestFocus(){
-        final AutoFocusManager focusManager = mCameraManager.getAutoFocusManager();
+        final FocusManager focusManager = mCameraManager.getFocusManager();
         if (focusManager != null) {
             focusManager.requestAutoFocus();
         }else{
