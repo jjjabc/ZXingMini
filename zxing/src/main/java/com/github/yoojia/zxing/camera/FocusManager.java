@@ -11,24 +11,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class FocusManager {
 
-    private final Camera mCamera;
     private final FocusEventsListener mFocusEventsListener;
-    private final boolean mAutoFocusEnabled;
 
     private final AtomicInteger mPeriod = new AtomicInteger(0);
 
     private final Handler mFocusHandler = new Handler(Looper.getMainLooper());
 
-    private final Runnable mFocusTask = new Runnable() {
-        @Override
-        public void run() {
-            requestAutoFocus();
-            final int period = mPeriod.get();
-            if (period > 0) {
-                repeatAutoFocus(period);
-            }
-        }
-    };
+    private AutoFocusTask mAutoFocusTask;
 
     private final Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
         @Override
@@ -37,40 +26,65 @@ public class FocusManager {
         }
     };
 
-    public FocusManager(Camera camera, FocusEventsListener focusEventsListener) {
-        mCamera = camera;
+    /**
+     * 创建对焦管理器,并指定对焦事件监听接口
+     * @param focusEventsListener 对焦事件监听接口
+     */
+    public FocusManager(FocusEventsListener focusEventsListener) {
         mFocusEventsListener = focusEventsListener;
-        final String mode = camera.getParameters().getFocusMode();
-        if (Camera.Parameters.FOCUS_MODE_AUTO.equals(mode) || Camera.Parameters.FOCUS_MODE_MACRO.equals(mode)){
-            mAutoFocusEnabled = true;
-        }else{
-            mAutoFocusEnabled = false;
-        }
     }
 
-    public void requestAutoFocus(){
-        mCamera.autoFocus(mAutoFocusCallback);
+    /**
+     * 请求相机执行对焦动作
+     * @param camera 相机对象
+     */
+    public void requestAutoFocus(Camera camera){
+        camera.autoFocus(mAutoFocusCallback);
     }
 
-    public void startAutoFocus(int ms){
+    /**
+     * 开启定时自动对焦
+     * @param camera 相机对象
+     * @param ms 定时,单位:毫秒
+     */
+    public void startAutoFocus(Camera camera, int ms){
         if (ms < 100) {
             throw new IllegalArgumentException("Auto Focus period time must more than 100ms !");
         }
-        if( ! mAutoFocusEnabled) {
-            return;
+        final String mode = camera.getParameters().getFocusMode();
+        if (Camera.Parameters.FOCUS_MODE_AUTO.equals(mode) || Camera.Parameters.FOCUS_MODE_MACRO.equals(mode)){
+            // Remove pre task
+            if (mAutoFocusTask != null) {
+                mFocusHandler.removeCallbacks(mAutoFocusTask);
+            }
+            mAutoFocusTask = new AutoFocusTask(camera);
+            mPeriod.set(ms);
+            mFocusHandler.post(mAutoFocusTask);
         }
-        mFocusHandler.removeCallbacks(mFocusTask);
-        mPeriod.set(ms);
-        mFocusHandler.post(mFocusTask);
     }
 
-    private void repeatAutoFocus(int period){
-        mFocusHandler.postDelayed(mFocusTask, period);
-    }
-
+    /**
+     * 停止自动对焦
+     */
     public void stopAutoFocus(){
         mPeriod.set(0);
-        mFocusHandler.removeCallbacks(mFocusTask);
+        mFocusHandler.removeCallbacks(mAutoFocusTask);
     }
 
+    private class AutoFocusTask implements Runnable{
+
+        private final Camera mCamera;
+
+        private AutoFocusTask(Camera camera) {
+            mCamera = camera;
+        }
+
+        @Override public void run() {
+            requestAutoFocus(mCamera);
+            final int period = mPeriod.get();
+            if (period > 0) {
+                mFocusHandler.postDelayed(mAutoFocusTask, period);
+            }
+        }
+    }
 }

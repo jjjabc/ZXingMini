@@ -43,7 +43,6 @@ public final class CameraManager {
     private final Context mContext;
 
     private Camera mCamera;
-    private FocusManager mFocusManager;
 
     private Rect mFramingRect;
 
@@ -53,97 +52,89 @@ public final class CameraManager {
     private int mRequestedFramingRectWidth;
     private int mRequestedFramingRectHeight;
 
-    private Point mScreenResolution;
-    private Point mCameraResolution;
+    private final Point mScreenResolution = new Point();
+    private final Point mCameraResolution = new Point();
 
     public CameraManager(Context context) {
         this.mContext = context;
     }
 
-    public FocusManager getFocusManager() {
-        return mFocusManager;
-    }
-
-    public void requestPreview(Camera.PreviewCallback callback){
-        mCamera.setOneShotPreviewCallback(callback);
-    }
-
-    public synchronized void open(SurfaceHolder holder) throws IOException {
-        if (mCamera == null) {
-            mCamera = OpenCameraInterface.open(OpenCameraInterface.NO_REQUESTED_CAMERA);
+    /**
+     * 开启相机设备
+     * @throws IOException 当相机设备无法启动, 或者相机已经开启时, 抛出 IOException 异常.
+     */
+    public void open() throws IOException {
+        if (! isOpen()) {
+            mCamera = OpenCamera.open(OpenCamera.NO_REQUESTED_CAMERA);
             if (mCamera == null) {
-                throw new IOException("Fail to open camera device !");
+                throw new IOException("Cannot open Camera device !");
             }
-        }
-        mCamera.setPreviewDisplay(holder);
-        // 设置预览方向。注意：此设置不会影响到PreviewCallback回调、及其生成的Bitmap图片的数据方向，
-        mCamera.setDisplayOrientation(90);
-        if (!mInitialized) {
-            mInitialized = true;
-            initFromCameraParameters(mCamera);
-            if (mRequestedFramingRectWidth > 0 && mRequestedFramingRectHeight > 0) {
-                setManualFramingRect(mRequestedFramingRectWidth, mRequestedFramingRectHeight);
-                mRequestedFramingRectWidth = 0;
-                mRequestedFramingRectHeight = 0;
-            }
-        }
-        Camera.Parameters parameters = mCamera.getParameters();
-        String parametersFlattened = parameters.flatten();
-        try {
-            setDesiredCameraParameters(mCamera, false);
-        } catch (RuntimeException re) {
-            // Driver failed
-            Log.e(TAG, "Camera rejected parameters. Setting only minimal safe-mode parameters");
-            Log.e(TAG, "Resetting to saved camera params: " + parametersFlattened);
-            // Reset:
-            parameters = mCamera.getParameters();
-            parameters.unflatten(parametersFlattened);
-            try {
-                mCamera.setParameters(parameters);
-                setDesiredCameraParameters(mCamera, true);
-            } catch (RuntimeException re2) {
-                // Well, darn. Give up
-                Log.e(TAG, "> Camera rejected even safe-mode parameters! No configuration");
-            }
+            initCamera();
+        }else {
+            throw new IOException("Camera was open !");
         }
     }
 
     /**
-     * @return 返回相机是否已开启
+     * 关闭相机设备
+     * @throws IOException 当相机设备尚未启动时, 抛出 IOException 异常.
      */
-    public synchronized boolean isOpen() {
-        return mCamera != null;
-    }
-
-    /**
-     * 如果相机被使用，则关闭它
-     */
-    public synchronized void close() {
+    public void close() throws IOException {
         if (isOpen()) {
             mCamera.release();
             mCamera = null;
             mFramingRect = null;
+        }else {
+            throw new IOException("Camera is not open !");
         }
     }
 
-    public synchronized void startPreview(FocusEventsListener focusEventsListener) {
+    /**
+     * 设置相机预览回调接口
+     * @param callback 预览回调接口
+     */
+    public void setPreviewCallback(Camera.PreviewCallback callback){
+        mCamera.setOneShotPreviewCallback(callback);
+    }
+
+    /**
+     * 指定相机预览SurfaceView
+     * @param previewHolder SurfaceView Holder
+     * @throws IOException
+     */
+    public void attachPreview(SurfaceHolder previewHolder) throws IOException {
+        mCamera.setPreviewDisplay(previewHolder);
+    }
+
+    /**
+     * 启动相机预览
+     */
+    public void startPreview() {
         if (mCamera != null && !mPreviewing) {
             mCamera.startPreview();
             mPreviewing = true;
-            mFocusManager = new FocusManager(mCamera, focusEventsListener);
         }
     }
 
-    public synchronized void stopPreview() {
-        if (mFocusManager != null) {
-            mFocusManager.stopAutoFocus();
-            mFocusManager = null;
-        }
+    /**
+     * 关闭相机预览
+     */
+    public void stopPreview() {
         if (mCamera != null && mPreviewing) {
             mCamera.stopPreview();
             mPreviewing = false;
         }
     }
+
+    public Camera getCamera() {
+        return mCamera;
+    }
+
+    public boolean isOpen() {
+        return mCamera != null;
+    }
+
+    //////////////
 
     public synchronized void setManualFramingRect(int width, int height) {
         if (mInitialized) {
@@ -163,21 +154,45 @@ public final class CameraManager {
         }
     }
 
-    public Camera getCamera() {
-        return mCamera;
+    private void initCamera(){
+        mCamera.setDisplayOrientation(90);
+        if (!mInitialized) {
+            mInitialized = true;
+            initFromCameraParameters(mCamera);
+            if (mRequestedFramingRectWidth > 0 && mRequestedFramingRectHeight > 0) {
+                setManualFramingRect(mRequestedFramingRectWidth, mRequestedFramingRectHeight);
+                mRequestedFramingRectWidth = 0;
+                mRequestedFramingRectHeight = 0;
+            }
+        }
+        Camera.Parameters parameters = mCamera.getParameters();
+        try {
+            setDesiredCameraParameters(mCamera, false);
+        } catch (RuntimeException e) {
+            // Reset:
+            final String resets = parameters.flatten();
+            Log.e(TAG, "- Camera rejected parameters. Setting only MINIMAL SAFE-MODE parameters");
+            Log.e(TAG, "- Resetting to saved camera params: " + resets);
+            parameters = mCamera.getParameters();
+            parameters.unflatten(resets);
+            try {
+                mCamera.setParameters(parameters);
+                setDesiredCameraParameters(mCamera, true);
+            } catch (RuntimeException ee) {
+                Log.e(TAG, "- Camera rejected even safe-mode parameters! NO CONFIGURATION");
+            }
+        }
     }
 
     private void initFromCameraParameters(Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
         WindowManager manager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         Display display = manager.getDefaultDisplay();
-        Point theScreenResolution = new Point();
-        display.getSize(theScreenResolution);
-        mScreenResolution = theScreenResolution;
-        Log.i(TAG, "Screen resolution: " + mScreenResolution);
-        mCameraResolution = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, mScreenResolution);
-        Log.i(TAG, "Camera resolution: " + mCameraResolution);
-
+        display.getSize(mScreenResolution);
+        Log.i(TAG, "- Screen resolution: " + mScreenResolution);
+        Point resolved = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, mScreenResolution);
+        mCameraResolution.set(resolved.x, resolved.y);
+        Log.i(TAG, "- Camera resolution: " + mCameraResolution);
     }
 
     private void setDesiredCameraParameters(Camera camera, boolean safeMode) {
@@ -197,17 +212,5 @@ public final class CameraManager {
             mCameraResolution.y = afterSize.height;
         }
     }
-
-    private static int findDesiredDimensionInRange(int resolution, int hardMin, int hardMax) {
-        int dim = 5 * resolution / 8; // Target 5/8 of each dimension
-        if (dim < hardMin) {
-            return hardMin;
-        }
-        if (dim > hardMax) {
-            return hardMax;
-        }
-        return dim;
-    }
-
 
 }

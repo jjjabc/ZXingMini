@@ -24,19 +24,19 @@ public class CameraController {
     private final CameraManager mCameraManager;
     private final SurfaceView mSurfaceView;
 
-    private final CameraSurfaceCallback mCameraSurfaceCallback = new CameraSurfaceCallback() {
+    private final SurfaceViewReadyCallback mSurfaceViewReadyCallback = new SurfaceViewReadyCallback() {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             if (mCameraManager.isOpen()){
                 return;
             }
             try {
-                mCameraManager.open(holder);
+                mCameraManager.open(/*holder*/);
             }catch (IOException ioe) {
                 Log.w(TAG, ioe);
                 return;
             }
-            mCameraManager.startPreview(mFocusEventsListener);
+//            mCameraManager.startPreview(mFocusEventsListener);
         }
     };
 
@@ -45,7 +45,7 @@ public class CameraController {
         public void onFocus(boolean focusSuccess) {
             // 对焦成功后，请求触发生成 **一次** 预览图片
             if (focusSuccess) {
-                mCameraManager.requestPreview(mPreviewCallback);
+                mCameraManager.setPreviewCallback(mPreviewCallback);
             }
         }
     };
@@ -64,7 +64,7 @@ public class CameraController {
 
     public void onResume(){
         final SurfaceHolder holder = mSurfaceView.getHolder();
-        holder.addCallback(mCameraSurfaceCallback);
+        holder.addCallback(mSurfaceViewReadyCallback);
     }
 
     @Deprecated
@@ -75,21 +75,21 @@ public class CameraController {
     public void onPause(){
         // 暂停相机
         final SurfaceHolder holder = mSurfaceView.getHolder();
-        holder.removeCallback(mCameraSurfaceCallback);
+        holder.removeCallback(mSurfaceViewReadyCallback);
         mCameraManager.stopPreview();
-        mCameraManager.close();
+//        mCameraManager.close();
     }
 
     /**
      * 请求相机对焦
      */
     public void requestFocus(){
-        final FocusManager focusManager = mCameraManager.getFocusManager();
-        if (focusManager != null) {
-            focusManager.requestAutoFocus();
-        }else{
-            Log.e(TAG, "- Request auto focus, but camera was STOP !");
-        }
+//        final FocusManager focusManager = mCameraManager.getFocusManager();
+//        if (focusManager != null) {
+//            focusManager.requestAutoFocus();
+//        }else{
+//            Log.e(TAG, "- Request auto focus, but camera was STOP !");
+//        }
     }
 
     /**

@@ -34,30 +34,30 @@ public class CameraActivity extends Activity{
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.capture_preview_view);
         mCamera = new Cameras(surfaceView);
 
-        mCamera.setPreviewCallback(new Camera.PreviewCallback() {
-            @Override
-            public void onPreviewFrame(byte[] data, Camera camera) {
-                Bitmap b = mCamera.capture(new Cameras.CameraPreview(data, camera));
-                image.setImageBitmap(b);
-            }
-        });
-        surfaceView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCamera.getCameraManager().getFocusManager().requestAutoFocus();
-            }
-        });
+//        mCamera.setPreviewCallback(new Camera.PreviewCallback() {
+//            @Override
+//            public void onPreviewFrame(byte[] data, Camera camera) {
+//                Bitmap b = mCamera.capture(new Cameras.CameraPreview(data, camera));
+//                image.setImageBitmap(b);
+//            }
+//        });
+//        surfaceView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mCamera.getCameraManager().getFocusManager().requestAutoFocus();
+//            }
+//        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mCamera.onResume();
+        mCamera.start();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mCamera.onPause();
+        mCamera.stop();
     }
 }
