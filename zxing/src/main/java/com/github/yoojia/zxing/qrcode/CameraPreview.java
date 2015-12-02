@@ -1,4 +1,4 @@
-package com.github.yoojia.zxing.camera;
+package com.github.yoojia.zxing.qrcode;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,7 +9,7 @@ import android.hardware.Camera;
 
 import java.io.ByteArrayOutputStream;
 
-final class CameraPreview {
+public final class CameraPreview {
 
     public final byte[] data;
     public final Camera camera;

@@ -36,7 +36,7 @@ public class QRCodeSupport {
                     mDecodeTask.cancel(true);
                 }
                 mDecodeTask = new PreviewQRCodeDecodeTask(mQRCodeDecode);
-                DecodeTask.CameraPreview preview = new DecodeTask.CameraPreview(data, camera);
+                CameraPreview preview = new CameraPreview(data, camera);
                 mDecodeTask.execute(preview);
             }
         });

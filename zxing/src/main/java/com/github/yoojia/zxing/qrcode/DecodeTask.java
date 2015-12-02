@@ -16,7 +16,7 @@ import java.io.ByteArrayOutputStream;
  * @since 1.0
  * 二维码解码线程
  */
-public abstract class DecodeTask extends AsyncTask<DecodeTask.CameraPreview, Bitmap, String> {
+public abstract class DecodeTask extends AsyncTask<CameraPreview, Bitmap, String> {
 
     private final Decoder mQRCodeDecode;
 
@@ -29,7 +29,7 @@ public abstract class DecodeTask extends AsyncTask<DecodeTask.CameraPreview, Bit
         if (params.length == 0){
             throw new IllegalArgumentException("Parameter required when call 'execute(CameraPreview)'; ");
         }
-        final Bitmap progress = capture(params[0]);
+        final Bitmap progress = params[0].capture();
         this.publishProgress(progress);
         return mQRCodeDecode.decode(progress);
     }
@@ -60,35 +60,4 @@ public abstract class DecodeTask extends AsyncTask<DecodeTask.CameraPreview, Bit
         // Override if need
     }
 
-    private Bitmap capture(CameraPreview cameraPreview){
-        final Camera.Parameters parameters = cameraPreview.mCamera.getParameters();
-        final int width = parameters.getPreviewSize().width;
-        final int height = parameters.getPreviewSize().height;
-        final YuvImage yuv = new YuvImage(cameraPreview.mData, parameters.getPreviewFormat(), width, height, null);
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        yuv.compressToJpeg(new Rect(0, 0, width, height), 100, out);// Best
-        final byte[] bytes = out.toByteArray();
-        final Bitmap src = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-        final Matrix matrix = new Matrix();
-        matrix.setRotate(90);
-        // 取图片中间部分
-        final int originWidth = src.getWidth();
-        final int originHeight = src.getHeight();
-        final int targetWH = originWidth > originHeight ? originHeight : originWidth;
-        final int offsetX = originWidth > originHeight ? (originWidth - originHeight) / 2 : 0;
-        final int offsetY = originWidth > originHeight ? 0 : (originHeight - originWidth) / 2;
-        // 将相机预览图片通过 progress 过程传递给上层
-        return Bitmap.createBitmap(src, offsetX, offsetY, targetWH, targetWH, matrix, true);
-    }
-
-    public static final class CameraPreview{
-
-        private final byte[] mData;
-        private final Camera mCamera;
-
-        public CameraPreview(byte[] data, Camera camera) {
-            mData = data;
-            mCamera = camera;
-        }
-    }
 }
