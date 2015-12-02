@@ -1,17 +1,12 @@
 package com.github.yoojia.zxing.camera;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author 陈小锅 (yoojia.chen@gmail.com)
@@ -19,97 +14,106 @@ import java.io.IOException;
  */
 public class Cameras {
 
-    private final static String TAG = "CAMERAS";
+    private final static String TAG = Cameras.class.getSimpleName();
 
+    private final SurfaceView mPreviewSurfaceView;
     private final CameraManager mCameraManager;
-    private final SurfaceView mSurfaceView;
+    private boolean mIsSurfaceViewReady = false;
 
-    private final CameraSurfaceCallback mCameraSurfaceCallback = new CameraSurfaceCallback() {
+    private FocusManager mFocusManager;
+
+    private final SurfaceViewReadyCallback mViewReadyCallback = new SurfaceViewReadyCallback() {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            initCamera(holder);
+            mIsSurfaceViewReady = true;
+            Log.d(TAG, "- Preview SurfaceView NOW ready, open camera by CameraManager");
+            mPreviewTask.run();
+        }
+
+        @Override
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            super.surfaceDestroyed(holder);
+            mIsSurfaceViewReady = false;
+            Log.d(TAG, "surfaceDestroy");
         }
     };
 
-    private final FocusEventsListener mFocusEventsListener = new FocusEventsListener() {
+    private OneshotTask mPreviewTask = new OneshotTask() {
         @Override
-        public void onFocus(boolean focusSuccess) {
-            // 对焦成功后，请求触发生成 **一次** 预览图片
-            if (focusSuccess) {
-                mCameraManager.requestPreview(mPreviewCallback);
+        public void doThis() {
+            Log.d(TAG, "- NOW open camera and start preview...");
+            try {
+                mCameraManager.attachPreview(mPreviewSurfaceView.getHolder());
+                mCameraManager.startPreview();
+                if (mFocusManager.isAutoFocusEnabled()) {
+                    mFocusManager.startAutoFocus(mCameraManager.getCamera());
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "- Cannot attach to preview", e);
             }
         }
     };
 
-    private Camera.PreviewCallback mPreviewCallback;
-
-    public Cameras(SurfaceView surfaceView) {
-        mCameraManager = new CameraManager(surfaceView.getContext().getApplicationContext());
-        mSurfaceView = surfaceView;
+    public Cameras(SurfaceView previewSurfaceView) {
+        mPreviewSurfaceView = previewSurfaceView;
+        mCameraManager = new CameraManager(previewSurfaceView.getContext());
+        final SurfaceHolder holder = mPreviewSurfaceView.getHolder();
+        holder.addCallback(mViewReadyCallback);
+        mFocusManager = new FocusManager();
     }
 
-    public void onResume(){
-        final SurfaceHolder holder = mSurfaceView.getHolder();
-        holder.addCallback(mCameraSurfaceCallback);
-    }
-
-    public void onPause(){
-        final SurfaceHolder holder = mSurfaceView.getHolder();
-        holder.removeCallback(mCameraSurfaceCallback);
-        mCameraManager.stopPreview();
-        mCameraManager.closeDriver();
-    }
-
-    public CameraManager getCameraManager() {
-        return mCameraManager;
-    }
-
-    public void setPreviewCallback(Camera.PreviewCallback previewCallback) {
-        mPreviewCallback = previewCallback;
-    }
-
-    public Bitmap capture(CameraPreview cameraPreview){
-        final Camera.Parameters parameters = cameraPreview.camera.getParameters();
-        final int width = parameters.getPreviewSize().width;
-        final int height = parameters.getPreviewSize().height;
-        final YuvImage yuv = new YuvImage(cameraPreview.data, parameters.getPreviewFormat(), width, height, null);
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        yuv.compressToJpeg(new Rect(0, 0, width, height), 100, out);// Best
-        final byte[] bytes = out.toByteArray();
-        final Bitmap src = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-        final Matrix matrix = new Matrix();
-        matrix.setRotate(90);
-        final int originWidth = src.getWidth();
-        final int originHeight = src.getHeight();
-        final int targetWH = originWidth > originHeight ? originHeight : originWidth;
-        final int offsetX = originWidth > originHeight ? (originWidth - originHeight): 0;
-        final int offsetY = originWidth > originHeight ? 0 : (originHeight - originWidth);
-        return Bitmap.createBitmap(src, offsetX, offsetY, targetWH, targetWH, matrix, true);
-    }
-
-    private void initCamera(SurfaceHolder holder){
-        if (mCameraManager.isOpen()){
-            return;
-        }
+    public void start() {
+        Log.d(TAG, "- Try open camera and start preview...");
         try {
-            mCameraManager.openDriver(holder);
-        }catch (IOException ioe) {
-            Log.w(TAG, ioe);
+            if (!mCameraManager.isOpen()) {
+                mCameraManager.open();
+            }
+            mPreviewTask.ready();
+            if (mIsSurfaceViewReady) {
+                Log.d(TAG, "openCameraDirectly");
+                mPreviewTask.run();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "- Cannot open camera", e);
         }
-        if (mPreviewCallback != null){
-            mCameraManager.requestPreview(mPreviewCallback);
-        }
-        mCameraManager.startPreview(mFocusEventsListener);
     }
 
-    public static final class CameraPreview{
 
-        private final byte[] data;
-        private final Camera camera;
-
-        public CameraPreview(byte[] data, Camera camera) {
-            this.data = data;
-            this.camera = camera;
+    public void stop() {
+        Log.d(TAG, "- Try stop preview and close camera...");
+        Log.d(TAG, "stopCameraDirectly");
+        mCameraManager.getCamera().setPreviewCallback(null);
+        mFocusManager.stopAutoFocus(mCameraManager.getCamera());
+        mCameraManager.stopPreview();
+        try {
+            mCameraManager.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
+
+    public void startAutoFocus(int period, Camera.AutoFocusCallback callback) {
+        mFocusManager.setAutoFocus(period, callback);
+        if (mCameraManager.isOpen() && mFocusManager.isAutoFocusEnabled()) {
+            mFocusManager.startAutoFocus(mCameraManager.getCamera());
+        }
+    }
+
+    static abstract class OneshotTask implements Runnable {
+        private AtomicBoolean ready = new AtomicBoolean();
+
+        public void ready() {
+            ready.set(true);
+        }
+
+        @Override
+        public final void run() {
+            if (ready.get()) {
+                ready.set(false);
+                doThis();
+            }
+        }
+
+        protected abstract void doThis();
     }
 }

@@ -19,11 +19,11 @@ package com.github.yoojia.zxing.camera;
 import android.hardware.Camera;
 import android.util.Log;
 
-public final class OpenCameraInterface {
+public final class OpenCamera {
 
-    private static final String TAG = OpenCameraInterface.class.getName();
+    private static final String TAG = OpenCamera.class.getName();
 
-    private OpenCameraInterface() {
+    private OpenCamera() {
     }
 
     /**
